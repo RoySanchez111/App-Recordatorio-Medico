@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, Button } from 'react-native';
+import { StyleSheet, Text, View, Image, Button, TouchableHighlight } from 'react-native';
 
 const icon = require('./assets/icon.png');
 export default function App() {
@@ -14,7 +14,16 @@ export default function App() {
 
       <Text style={{color: 'white'}}>{'Inicio de la aplicacion'}</Text> {/* Texto */}
       <StatusBar style="light" /> {/* Color de la barra superior */}
-      <Button title="Pulsa aqui" onPress={() => alert('Hola')} /> {/* Prueba de boton */}
+      {/*<Button title="Pulsa aqui" onPress={() => alert('Hola')} /> {/* Prueba de boton netivo */}
+      <TouchableHighlight
+        underlayColor={"#09f"}
+        onPress={() => alert('Hola')}
+        style={{width:200, height: 200, backgroundColor: 'red', borderRadius: 70,
+        justifyContent: 'center', alignItems: 'center'
+        }}
+      >
+        <Text style={{color: 'white'}}>Pulsa aqui</Text>
+      </TouchableHighlight>  
     </View>
   );
 }
