@@ -774,10 +774,19 @@ function RequestAppointmentScreen({ navigation }) {
     </View>
   );
 }
-
-// Receta
-function PrescriptionScreen({ navigation }) {
+// Receta dinámica
+function PrescriptionScreen({ route, navigation }) {
   const { accessibilitySettings } = useContext(PrescriptionsContext);
+
+  // Receta enviada desde la pantalla anterior
+  const receta = route.params?.receta || {};
+
+  const {
+    fechaEmision = "Sin fecha",
+    diagnostico = "Sin diagnóstico",
+    observaciones = "Sin observaciones",
+    medicamentos = []
+  } = receta;
 
   const card1 = useDualPress();
   const card2 = useDualPress();
@@ -796,168 +805,85 @@ function PrescriptionScreen({ navigation }) {
                 Receta - Health Reminder
               </ScreenTitle>
 
+              {/* FECHA */}
               <Pressable
                 style={styles.infoCard}
                 onPressIn={card1.handlePressIn}
                 onPressOut={card1.handlePressOut}
               >
-                <Text
-                  style={[
-                    styles.cardTitle,
-                    accessibilitySettings.largeFont && { fontSize: 18 },
-                  ]}
-                >
+                <Text style={[styles.cardTitle, accessibilitySettings.largeFont && { fontSize: 18 }]}>
                   Fecha de Emisión
                 </Text>
-                <Text
-                  style={[
-                    styles.cardContent,
-                    accessibilitySettings.largeFont && { fontSize: 16 },
-                  ]}
-                >
-                  29/10/2025
+                <Text style={[styles.cardContent, accessibilitySettings.largeFont && { fontSize: 16 }]}>
+                  {fechaEmision}
                 </Text>
               </Pressable>
 
+              {/* DIAGNOSTICO */}
               <Pressable
                 style={styles.infoCard}
                 onPressIn={card2.handlePressIn}
                 onPressOut={card2.handlePressOut}
               >
-                <Text
-                  style={[
-                    styles.cardTitle,
-                    accessibilitySettings.largeFont && { fontSize: 18 },
-                  ]}
-                >
+                <Text style={[styles.cardTitle, accessibilitySettings.largeFont && { fontSize: 18 }]}>
                   Diagnóstico
                 </Text>
-                <Text
-                  style={[
-                    styles.cardContent,
-                    accessibilitySettings.largeFont && { fontSize: 16 },
-                  ]}
-                >
-                  Infección respiratoria superior
+                <Text style={[styles.cardContent, accessibilitySettings.largeFont && { fontSize: 16 }]}>
+                  {diagnostico}
                 </Text>
               </Pressable>
 
+              {/* OBSERVACIONES */}
               <Pressable
                 style={styles.infoCard}
                 onPressIn={card3.handlePressIn}
                 onPressOut={card3.handlePressOut}
               >
-                <Text
-                  style={[
-                    styles.cardTitle,
-                    accessibilitySettings.largeFont && { fontSize: 18 },
-                  ]}
-                >
+                <Text style={[styles.cardTitle, accessibilitySettings.largeFont && { fontSize: 18 }]}>
                   Observación
                 </Text>
-                <Text
-                  style={[
-                    styles.cardContent,
-                    accessibilitySettings.largeFont && { fontSize: 16 },
-                  ]}
-                >
-                  Paciente con fiebre y tos persistente, se recomienda reposo y aumento de líquidos.
+                <Text style={[styles.cardContent, accessibilitySettings.largeFont && { fontSize: 16 }]}>
+                  {observaciones}
                 </Text>
               </Pressable>
 
+              {/* MEDICAMENTOS */}
               <Pressable
                 style={styles.infoCard}
                 onPressIn={card4.handlePressIn}
                 onPressOut={card4.handlePressOut}
               >
-                <Text
-                  style={[
-                    styles.cardTitle,
-                    accessibilitySettings.largeFont && { fontSize: 18 },
-                  ]}
-                >
+                <Text style={[styles.cardTitle, accessibilitySettings.largeFont && { fontSize: 18 }]}>
                   Medicamentos
                 </Text>
 
-                <View style={styles.medicationItemPrescription}>
-                  <Text
-                    style={[
-                      styles.medicationName,
-                      styles.paracetamol,
-                      accessibilitySettings.largeFont && { fontSize: 16 },
-                    ]}
-                  >
-                    Paracetamol 500mg
+                {medicamentos.length === 0 ? (
+                  <Text style={[styles.cardContent, accessibilitySettings.largeFont && { fontSize: 16 }]}>
+                    No hay medicamentos asignados
                   </Text>
-                  <Text
-                    style={[
-                      styles.medicationDosage,
-                      accessibilitySettings.largeFont && { fontSize: 14 },
-                    ]}
-                  >
-                    1 cápsula cada 8 horas - Duración: 7 días
-                  </Text>
-                </View>
+                ) : (
+                  medicamentos.map((med, index) => (
+                    <View key={index} style={styles.medicationItemPrescription}>
+                      <Text
+                        style={[
+                          styles.medicationName,
+                          accessibilitySettings.largeFont && { fontSize: 16 }
+                        ]}
+                      >
+                        {med.nombre_medicamento}
+                      </Text>
 
-                <View style={styles.medicationItemPrescription}>
-                  <Text
-                    style={[
-                      styles.medicationName,
-                      styles.ibuprofeno,
-                      accessibilitySettings.largeFont && { fontSize: 16 },
-                    ]}
-                  >
-                    Ibuprofeno 500mg
-                  </Text>
-                  <Text
-                    style={[
-                      styles.medicationDosage,
-                      accessibilitySettings.largeFont && { fontSize: 14 },
-                    ]}
-                  >
-                    1 cápsula cada 24 horas - Duración: 10 días
-                  </Text>
-                </View>
-
-                <View style={styles.medicationItemPrescription}>
-                  <Text
-                    style={[
-                      styles.medicationName,
-                      styles.naproxeno,
-                      accessibilitySettings.largeFont && { fontSize: 16 },
-                    ]}
-                  >
-                    Naproxeno 500mg
-                  </Text>
-                  <Text
-                    style={[
-                      styles.medicationDosage,
-                      accessibilitySettings.largeFont && { fontSize: 14 },
-                    ]}
-                  >
-                    1 cápsula cada 12 horas - Duración: 3 días
-                  </Text>
-                </View>
-
-                <View style={styles.medicationItemPrescription}>
-                  <Text
-                    style={[
-                      styles.medicationName,
-                      styles.tempra,
-                      accessibilitySettings.largeFont && { fontSize: 16 },
-                    ]}
-                  >
-                    Tempra 250mg
-                  </Text>
-                  <Text
-                    style={[
-                      styles.medicationDosage,
-                      accessibilitySettings.largeFont && { fontSize: 14 },
-                    ]}
-                  >
-                    1 cápsula cada 12 horas - Duración: 2 días
-                  </Text>
-                </View>
+                      <Text
+                        style={[
+                          styles.medicationDosage,
+                          accessibilitySettings.largeFont && { fontSize: 14 }
+                        ]}
+                      >
+                        {med.dosis} - {med.frecuencia} - Duración: {med.duracion} días
+                      </Text>
+                    </View>
+                  ))
+                )}
               </Pressable>
             </View>
 
@@ -974,7 +900,6 @@ function PrescriptionScreen({ navigation }) {
     </View>
   );
 }
-
 // Perfil
 function ProfileScreen({ navigation }) {
   const { accessibilitySettings, setAccessibilitySettings } = useContext(PrescriptionsContext);
