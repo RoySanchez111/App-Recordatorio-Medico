@@ -21,12 +21,12 @@ import * as Speech from 'expo-speech';
 import { Picker } from '@react-native-picker/picker';
 
 const Stack = createStackNavigator();
-const PrescriptionsContext = createContext();
+
+// ===================== CONTEXTO GLOBAL =====================
+export const PrescriptionsContext = createContext();
 const heartbeatLogo = require('./assets/heartbeat_logo.png');
 
-/* ===================== HELPERS REUTILIZABLES ===================== */
-
-// Hook dual: tap rápido + mantener presionado
+// ===================== HOOKS REUTILIZABLES =====================
 const useDualPress = (onQuickPress, onLongPress, longPressDuration = 5000, vibrationDuration = 500) => {
   const [isPressing, setIsPressing] = useState(false);
   const pressTimer = useRef(null);
@@ -36,7 +36,7 @@ const useDualPress = (onQuickPress, onLongPress, longPressDuration = 5000, vibra
     pressTimer.current = setTimeout(() => {
       Vibration.vibrate(vibrationDuration);
       setIsPressing(false);
-      onLongPress && onLongPress();
+      onLongPress?.();
     }, longPressDuration);
   };
 
@@ -48,12 +48,12 @@ const useDualPress = (onQuickPress, onLongPress, longPressDuration = 5000, vibra
     }
   };
 
-  const handleQuickPress = () => onQuickPress && onQuickPress();
+  const handleQuickPress = () => onQuickPress?.();
 
   return { isPressing, handlePressIn, handlePressOut, handleQuickPress };
 };
 
-// Lectura en voz alta centralizada
+// ===================== FUNCIONES DE ACCESIBILIDAD =====================
 const speakIfEnabled = (accessibilitySettings, text) => {
   if (accessibilitySettings?.ttsEnabled && text) {
     Speech.stop();
@@ -61,50 +61,36 @@ const speakIfEnabled = (accessibilitySettings, text) => {
   }
 };
 
-// Título de sección reutilizable
+// ===================== COMPONENTES REUTILIZABLES =====================
 const ScreenTitle = ({ children, accessibilitySettings }) => (
-  <Text
-    style={[
-      styles.sectionTitle,
-      accessibilitySettings.largeFont && styles.sectionTitleLarge,
-    ]}
-  >
+  <Text style={[
+    styles.sectionTitle,
+    accessibilitySettings?.largeFont && styles.sectionTitleLarge,
+  ]}>
     {children}
   </Text>
 );
 
-// Selector reutilizable (Picker con comportamiento distinto por plataforma)
 const PickerField = ({ value, onChange, items, accessibilitySettings }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
-  const selectedLabel =
-    items.find((i) => i.value === value)?.label || items[0]?.label || 'Elige una opción';
+  const selectedLabel = items.find(i => i.value === value)?.label || 'Elige una opción';
 
-  // iOS: input “falso” + modal con el picker
   if (Platform.OS === 'ios') {
     return (
       <>
-        <Pressable
-          style={styles.iosPickerFakeInput}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text
-            style={[
-              styles.dateInputText,
-              accessibilitySettings.largeFont && { fontSize: 18 },
-              !value && { color: '#666' },
-            ]}
-          >
+        <Pressable style={styles.iosPickerFakeInput} onPress={() => setModalVisible(true)}>
+          <Text style={[
+            styles.dateInputText,
+            accessibilitySettings?.largeFont && { fontSize: 18 },
+            !value && { color: '#666' }
+          ]}>
             {selectedLabel}
           </Text>
           <Ionicons name="chevron-down" size={18} color="#666" />
         </Pressable>
 
-        <Modal
-          visible={modalVisible}
-          transparent
-          animationType="slide"
-        >
+        <Modal visible={modalVisible} transparent animationType="slide">
           <View style={styles.modalBackdrop}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
@@ -113,16 +99,15 @@ const PickerField = ({ value, onChange, items, accessibilitySettings }) => {
                   <Text style={styles.modalCloseText}>Cerrar</Text>
                 </Pressable>
               </View>
-
               <Picker
                 selectedValue={value}
                 onValueChange={(val) => {
                   onChange(val);
                   setModalVisible(false);
                 }}
-                itemStyle={accessibilitySettings.largeFont ? { fontSize: 18 } : {}}
+                itemStyle={accessibilitySettings?.largeFont ? { fontSize: 18 } : {}}
               >
-                {items.map((item) => (
+                {items.map(item => (
                   <Picker.Item key={item.value} label={item.label} value={item.value} />
                 ))}
               </Picker>
@@ -133,91 +118,18 @@ const PickerField = ({ value, onChange, items, accessibilitySettings }) => {
     );
   }
 
-  // Android: dropdown como siempre
+  // Android
   return (
     <View style={styles.pickerContainer}>
       <Picker
         selectedValue={value}
         onValueChange={onChange}
-        style={[styles.picker, accessibilitySettings.largeFont && { fontSize: 18 }]}
-        itemStyle={accessibilitySettings.largeFont ? { fontSize: 18 } : {}}
+        style={[styles.picker, accessibilitySettings?.largeFont && { fontSize: 18 }]}
       >
-        {items.map((item) => (
+        {items.map(item => (
           <Picker.Item key={item.value} label={item.label} value={item.value} />
         ))}
       </Picker>
-    </View>
-  );
-};
-
-// Barra de navegación inferior reutilizable
-const BottomNav = ({ navigation, accessibilitySettings, active }) => {
-  const navCalendar = useDualPress(() => {
-    speakIfEnabled(accessibilitySettings, 'Calendario Health');
-    navigation.navigate('MainApp');
-  });
-  const navRequest = useDualPress(() => {
-    speakIfEnabled(accessibilitySettings, 'Solicitar consulta');
-    navigation.navigate('RequestAppointment');
-  });
-  const navPrescription = useDualPress(() => {
-    speakIfEnabled(accessibilitySettings, 'Receta');
-    navigation.navigate('Prescription');
-  });
-  const navProfile = useDualPress(() => {
-    speakIfEnabled(accessibilitySettings, 'Perfil');
-    navigation.navigate('Profile');
-  });
-
-  const iconColor = (tab) => (active === tab ? '#007AFF' : '#666');
-
-  const textStyle = (tab) => [
-    styles.navText,
-    active === tab && styles.activeNavText,
-    accessibilitySettings.largeFont && { fontSize: 12 },
-  ];
-
-  return (
-    <View style={styles.bottomNavigation}>
-      <Pressable
-        style={styles.navItem}
-        onPress={navCalendar.handleQuickPress}
-        onPressIn={navCalendar.handlePressIn}
-        onPressOut={navCalendar.handlePressOut}
-      >
-        <Ionicons name="calendar" size={24} color={iconColor('calendar')} />
-        <Text style={textStyle('calendar')}>Calendario{'\n'}Health</Text>
-      </Pressable>
-
-      <Pressable
-        style={styles.navItem}
-        onPress={navRequest.handleQuickPress}
-        onPressIn={navRequest.handlePressIn}
-        onPressOut={navRequest.handlePressOut}
-      >
-        <Ionicons name="add-circle" size={24} color={iconColor('request')} />
-        <Text style={textStyle('request')}>Solicitar{'\n'}Consulta</Text>
-      </Pressable>
-
-      <Pressable
-        style={styles.navItem}
-        onPress={navPrescription.handleQuickPress}
-        onPressIn={navPrescription.handlePressIn}
-        onPressOut={navPrescription.handlePressOut}
-      >
-        <Ionicons name="document-text" size={24} color={iconColor('prescription')} />
-        <Text style={textStyle('prescription')}>Receta</Text>
-      </Pressable>
-
-      <Pressable
-        style={styles.navItem}
-        onPress={navProfile.handleQuickPress}
-        onPressIn={navProfile.handlePressIn}
-        onPressOut={navProfile.handlePressOut}
-      >
-        <Ionicons name="person" size={24} color={iconColor('profile')} />
-        <Text style={textStyle('profile')}>Perfil</Text>
-      </Pressable>
     </View>
   );
 };
@@ -596,7 +508,7 @@ function MainAppScreen({ navigation }) {
       </View>
     </View>
   );
-}
+} 
 
 // Solicitar consulta
 function RequestAppointmentScreen({ navigation }) {
