@@ -1,5 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState, useRef, createContext, useContext } from 'react';
+// --- ¡CORREGIDO! ---
+// Añadimos 'useEffect' a la importación
+import React, { useState, useRef, createContext, useContext, useEffect } from 'react'; 
 import {
   StyleSheet,
   Text,
@@ -10,6 +12,7 @@ import {
   Image,
   Vibration,
   Linking,
+  Alert // <-- AÑADIDO: Usaremos Alert en lugar de alert
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -21,6 +24,9 @@ import { Picker } from '@react-native-picker/picker';
 const Stack = createStackNavigator();
 const PrescriptionsContext = createContext();
 const heartbeatLogo = require('./assets/heartbeat_logo.png');
+
+// <-- AÑADIDO: Tu URL de API (¡Asegúrate de que sea la correcta!)
+const API_URL = "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
 
 /* ===================== HELPERS REUTILIZABLES ===================== */
 
@@ -161,7 +167,7 @@ const PickerField = ({ value, onChange, items, accessibilitySettings }) => (
 
 /* ===================== PANTALLAS ===================== */
 
-// Home
+// Home (Sin cambios)
 function HomeScreen({ navigation }) {
   const emergencyNumber = '911';
   const { accessibilitySettings } = useContext(PrescriptionsContext);
@@ -228,20 +234,61 @@ function HomeScreen({ navigation }) {
   );
 }
 
-// Login
+// --- Login (MODIFICADO PARA CONECTAR A API) ---
 function LoginScreen({ navigation }) {
   const [claveUnica, setClaveUnica] = useState('');
   const [contrasena, setContrasena] = useState('');
-  const { accessibilitySettings } = useContext(PrescriptionsContext);
+  const [loading, setLoading] = useState(false);
+  const { accessibilitySettings, setUser } = useContext(PrescriptionsContext);
 
-  const { isPressing, handlePressIn, handlePressOut, handleQuickPress } = useDualPress(() => {
-    if (claveUnica && contrasena) {
-      alert(`Ingreso exitoso\nClave: ${claveUnica}`);
-      navigation.navigate('MainApp');
-    } else {
-      alert('Por favor ingresa tu clave única y contraseña');
+  const handleLogin = async () => {
+    if (!claveUnica || !contrasena) {
+      Alert.alert('Error', 'Por favor ingresa tu clave única y contraseña');
+      return;
     }
-  });
+    
+    setLoading(true);
+
+    const payload = {
+      action: "login",
+      data: {
+        claveUnica: claveUnica,
+        password: contrasena // Usamos 'password' (sin ñ)
+      }
+    };
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al iniciar sesión');
+      }
+      
+      if (data.user && data.user.esPaciente) {
+        Alert.alert('Ingreso exitoso', `Bienvenido(a) ${data.user.nombreCompleto}`);
+        setUser(data.user); // Guardamos el usuario en el Contexto
+        navigation.navigate('MainApp'); 
+      } else {
+        throw new Error("Este usuario no es un paciente.");
+      }
+
+    } catch (err) {
+      Alert.alert('Error de Login', err.message || 'No se pudo conectar al servidor.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const { isPressing, handlePressIn, handlePressOut } = useDualPress(
+    handleLogin, 
+    () => Vibration.vibrate(500) 
+  );
 
   return (
     <View style={styles.screenContainer}>
@@ -275,6 +322,7 @@ function LoginScreen({ navigation }) {
               onChangeText={setClaveUnica}
               autoCapitalize="none"
               autoCorrect={false}
+              editable={!loading} 
             />
 
             <Text
@@ -297,17 +345,19 @@ function LoginScreen({ navigation }) {
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
+              editable={!loading} 
             />
 
             <Pressable
               style={({ pressed }) => [
                 styles.button,
                 pressed && styles.buttonPressed,
-                isPressing && styles.navButtonActive,
+                (isPressing || loading) && styles.navButtonActive,
               ]}
-              onPress={handleQuickPress}
+              onPress={handleLogin} 
               onPressIn={handlePressIn}
               onPressOut={handlePressOut}
+              disabled={loading} 
             >
               <Text
                 style={[
@@ -315,7 +365,7 @@ function LoginScreen({ navigation }) {
                   accessibilitySettings.largeFont && { fontSize: 18 },
                 ]}
               >
-                {isPressing ? 'Mantén para vibración...' : 'Ingresar'}
+                {loading ? 'Ingresando...' : (isPressing ? 'Mantén...' : 'Ingresar')}
               </Text>
             </Pressable>
           </View>
@@ -535,25 +585,98 @@ function MainAppScreen({ navigation }) {
   );
 }
 
-// Solicitar consulta
+// --- Solicitar consulta (MODIFICADO PARA CONECTAR A API) ---
 function RequestAppointmentScreen({ navigation }) {
   const [fechaConsulta, setFechaConsulta] = useState(new Date());
   const [motivoConsulta, setMotivoConsulta] = useState('');
+  const [sintomas, setSintomas] = useState(''); // <-- AÑADIDO: Campo de Síntomas
   const [prioridad, setPrioridad] = useState('');
   const [doctor, setDoctor] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [loading, setLoading] = useState(false); 
 
-  const { accessibilitySettings } = useContext(PrescriptionsContext);
+  const { accessibilitySettings, user } = useContext(PrescriptionsContext);
 
-  const { isPressing: submitPressing, handlePressIn: submitPressIn, handlePressOut: submitPressOut, handleQuickPress: submitQuickPress } =
-    useDualPress(() => {
-      if (motivoConsulta && prioridad && doctor) {
-        alert('Consulta solicitada exitosamente');
-        navigation.navigate('MainApp');
-      } else {
-        alert('Por favor completa todos los campos');
+  const handleSubmitConsulta = async () => {
+    if (!motivoConsulta || !prioridad || !doctor ) {
+      Alert.alert('Campos incompletos', 'Por favor completa todos los campos');
+      return;
+    }
+    
+    if (!user || !user.id) {
+      Alert.alert('Error de Sesión', 'No se pudo identificar al paciente. Por favor, inicia sesión de nuevo.');
+      navigation.navigate('Login');
+      return;
+    }
+    
+    setLoading(true);
+
+    // TODO: La lista de doctores debería cargarse desde la API.
+    // Usaremos el Doctor de prueba que tenemos en la DB (ID "2").
+    const doctorData = {
+        id: "2", // ID del Dr. Doctor
+        nombre: "Doctor" // Nombre del Dr. Doctor
+    };
+
+    // --- AÑADIDO: Calcular edad del paciente ---
+    let edadCalculada = 25; // Default
+    if (user.fechaNacimiento) {
+        try {
+            const hoy = new Date();
+            const fechaNac = new Date(user.fechaNacimiento);
+            let edad = hoy.getFullYear() - fechaNac.getFullYear();
+            const m = hoy.getMonth() - fechaNac.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) {
+                edad--;
+            }
+            edadCalculada = edad;
+        } catch(e) { console.error("Error calculando edad"); }
+    }
+
+    const payload = {
+      action: "createConsulta",
+      data: {
+        id_paciente: user.id,
+        pacienteNombre: user.nombreCompleto,
+        edad: edadCalculada, 
+        telefono: user.telefono || 'N/A',
+        id_doctor: doctorData.id,
+        doctorNombre: doctorData.nombre,
+        especialidad: "General", // TODO
+        fecha: fechaConsulta.toISOString(),
+        motivo: motivoConsulta,
+        sintomas: sintomas,
+        status: "pendiente",
+        prioridad: prioridad
       }
-    });
+    };
+
+    try {
+      const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok) {
+          throw new Error(data.message || 'Error al crear la consulta');
+      }
+
+      Alert.alert('Éxito', 'Consulta solicitada exitosamente');
+      navigation.navigate('MainApp');
+
+    } catch (err) {
+      Alert.alert('Error', err.message || 'No se pudo conectar al servidor.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const { isPressing: submitPressing, handlePressIn: submitPressIn, handlePressOut: submitPressOut } =
+    useDualPress(
+      handleSubmitConsulta, 
+      () => Vibration.vibrate(500)
+    );
 
   const onDateChange = (_, selectedDate) => {
     setShowDatePicker(false);
@@ -585,6 +708,7 @@ function RequestAppointmentScreen({ navigation }) {
               <Pressable
                 style={styles.dateInput}
                 onPress={() => setShowDatePicker(true)}
+                disabled={loading}
               >
                 <Text
                   style={[
@@ -627,8 +751,34 @@ function RequestAppointmentScreen({ navigation }) {
                 multiline
                 numberOfLines={3}
                 textAlignVertical="top"
+                editable={!loading}
               />
 
+              {/* <-- AÑADIDO: Campo de Síntomas --> */}
+              <Text
+                style={[
+                  styles.label,
+                  accessibilitySettings.largeFont && { fontSize: 16 },
+                ]}
+              >
+                Síntomas (opcional)
+              </Text>
+              <TextInput
+                style={[
+                  styles.textInput,
+                  styles.multilineInput,
+                  accessibilitySettings.largeFont && { fontSize: 18 },
+                ]}
+                placeholder="Describe tus síntomas"
+                placeholderTextColor="#666"
+                value={sintomas}
+                onChangeText={setSintomas}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                editable={!loading}
+              />
+              
               <Text
                 style={[
                   styles.label,
@@ -662,10 +812,9 @@ function RequestAppointmentScreen({ navigation }) {
                 onChange={setDoctor}
                 accessibilitySettings={accessibilitySettings}
                 items={[
+                  // TODO: Cargar esta lista desde la API
                   { label: 'Elija una opción', value: '' },
-                  { label: 'Médico 1', value: 'medico1' },
-                  { label: 'Médico 2', value: 'medico2' },
-                  { label: 'Médico 3', value: 'medico3' },
+                  { label: 'Doctor (Prueba)', value: 'medico1' },
                 ]}
               />
 
@@ -673,11 +822,12 @@ function RequestAppointmentScreen({ navigation }) {
                 style={({ pressed }) => [
                   styles.button,
                   pressed && styles.buttonPressed,
-                  submitPressing && styles.navButtonActive,
+                  (submitPressing || loading) && styles.navButtonActive,
                 ]}
-                onPress={submitQuickPress}
+                onPress={handleSubmitConsulta}
                 onPressIn={submitPressIn}
                 onPressOut={submitPressOut}
+                disabled={loading} 
               >
                 <Text
                   style={[
@@ -685,7 +835,7 @@ function RequestAppointmentScreen({ navigation }) {
                     accessibilitySettings.largeFont && { fontSize: 18 },
                   ]}
                 >
-                  {submitPressing ? 'Mantén para vibración...' : 'Solicitar'}
+                  {loading ? 'Enviando...' : (submitPressing ? 'Mantén...' : 'Solicitar')}
                 </Text>
               </Pressable>
             </View>
@@ -704,14 +854,107 @@ function RequestAppointmentScreen({ navigation }) {
   );
 }
 
-// Receta
+// --- Receta (MODIFICADO PARA CONECTAR A API) ---
 function PrescriptionScreen({ navigation }) {
-  const { accessibilitySettings } = useContext(PrescriptionsContext);
+  const { accessibilitySettings, user } = useContext(PrescriptionsContext); 
+  
+  const [recetas, setRecetas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!user || !user.id) {
+        setError("No se pudo identificar al paciente. Inicia sesión.");
+        setLoading(false);
+        return;
+    }
+    
+    const fetchRecetas = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const payload = {
+                action: "getRecipesByPatient",
+                data: { pacienteId: user.id }
+            };
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Error al cargar recetas');
+            }
+            setRecetas(data.sort((a, b) => new Date(b.fechaEmision) - new Date(a.fechaEmision)));
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    fetchRecetas();
+  }, [user]); 
+
 
   const card1 = useDualPress();
   const card2 = useDualPress();
   const card3 = useDualPress();
   const card4 = useDualPress();
+
+  if (loading) {
+      return (
+          <View style={styles.screenContainer}>
+              <View style={styles.contentFrame}>
+                  <View style={styles.container}>
+                      <ScreenTitle accessibilitySettings={accessibilitySettings}>Receta</ScreenTitle>
+                      <Text style={{textAlign: 'center', padding: 20}}>Cargando tus recetas...</Text>
+                      <BottomNav navigation={navigation} accessibilitySettings={accessibilitySettings} active="prescription" />
+                  </View>
+              </View>
+          </View>
+      );
+  }
+  
+  if (error) {
+      return (
+          <View style={styles.screenContainer}>
+              <View style={styles.contentFrame}>
+                  <View style={styles.container}>
+                      {/* --- ¡ESTA ES LA LÍNEA CORREGIDA! --- */}
+                      <ScreenTitle accessibilitySettings={accessibilitySettings}>Receta</ScreenTitle>
+                      <Text style={{textAlign: 'center', padding: 20, color: 'red'}}>Error: {error}</Text>
+                      <BottomNav navigation={navigation} accessibilitySettings={accessibilitySettings} active="prescription" />
+                  </View>
+              </View>
+          </View>
+      );
+  }
+  
+  if (recetas.length === 0) {
+      return (
+          <View style={styles.screenContainer}>
+              <View style={styles.contentFrame}>
+                  <View style={styles.container}>
+                      <ScrollView contentContainerStyle={styles.prescriptionScrollContent}>
+                          <View style={styles.invisiblePadding} />
+                          <View style={styles.prescriptionContainer}>
+                              <ScreenTitle accessibilitySettings={accessibilitySettings}>Receta - Health Reminder</ScreenTitle>
+                              <Text style={{textAlign: 'center', padding: 20, fontSize: 16, color: '#666'}}>
+                                  No tienes recetas activas en este momento.
+                              </Text>
+                          </View>
+                          <View style={styles.extraBottomPadding} />
+                      </ScrollView>
+                      <BottomNav navigation={navigation} accessibilitySettings={accessibilitySettings} active="prescription" />
+                  </View>
+              </View>
+          </View>
+      );
+  }
+  
+  const recetaMasReciente = recetas[0]; // El array ya está ordenado
 
   return (
     <View style={styles.screenContainer}>
@@ -724,7 +967,10 @@ function PrescriptionScreen({ navigation }) {
               <ScreenTitle accessibilitySettings={accessibilitySettings}>
                 Receta - Health Reminder
               </ScreenTitle>
-
+              <Text style={{textAlign: 'center', color: '#666', marginBottom: 15, fontSize: 12}}>
+                  Mostrando tu receta más reciente.
+              </Text>
+              
               <Pressable
                 style={styles.infoCard}
                 onPressIn={card1.handlePressIn}
@@ -744,7 +990,7 @@ function PrescriptionScreen({ navigation }) {
                     accessibilitySettings.largeFont && { fontSize: 16 },
                   ]}
                 >
-                  29/10/2025
+                  {new Date(recetaMasReciente.fechaEmision).toLocaleDateString('es-ES', { timeZone: 'UTC' })}
                 </Text>
               </Pressable>
 
@@ -767,7 +1013,7 @@ function PrescriptionScreen({ navigation }) {
                     accessibilitySettings.largeFont && { fontSize: 16 },
                   ]}
                 >
-                  Infección respiratoria superior
+                  {recetaMasReciente.diagnostico}
                 </Text>
               </Pressable>
 
@@ -790,7 +1036,7 @@ function PrescriptionScreen({ navigation }) {
                     accessibilitySettings.largeFont && { fontSize: 16 },
                   ]}
                 >
-                  Paciente con fiebre y tos persistente, se recomienda reposo y aumento de líquidos.
+                  {recetaMasReciente.observaciones || 'Sin observaciones.'}
                 </Text>
               </Pressable>
 
@@ -808,85 +1054,28 @@ function PrescriptionScreen({ navigation }) {
                   Medicamentos
                 </Text>
 
-                <View style={styles.medicationItemPrescription}>
-                  <Text
-                    style={[
-                      styles.medicationName,
-                      styles.paracetamol,
-                      accessibilitySettings.largeFont && { fontSize: 16 },
-                    ]}
-                  >
-                    Paracetamol 500mg
-                  </Text>
-                  <Text
-                    style={[
-                      styles.medicationDosage,
-                      accessibilitySettings.largeFont && { fontSize: 14 },
-                    ]}
-                  >
-                    1 cápsula cada 8 horas - Duración: 7 días
-                  </Text>
-                </View>
-
-                <View style={styles.medicationItemPrescription}>
-                  <Text
-                    style={[
-                      styles.medicationName,
-                      styles.ibuprofeno,
-                      accessibilitySettings.largeFont && { fontSize: 16 },
-                    ]}
-                  >
-                    Ibuprofeno 500mg
-                  </Text>
-                  <Text
-                    style={[
-                      styles.medicationDosage,
-                      accessibilitySettings.largeFont && { fontSize: 14 },
-                    ]}
-                  >
-                    1 cápsula cada 24 horas - Duración: 10 días
-                  </Text>
-                </View>
-
-                <View style={styles.medicationItemPrescription}>
-                  <Text
-                    style={[
-                      styles.medicationName,
-                      styles.naproxeno,
-                      accessibilitySettings.largeFont && { fontSize: 16 },
-                    ]}
-                  >
-                    Naproxeno 500mg
-                  </Text>
-                  <Text
-                    style={[
-                      styles.medicationDosage,
-                      accessibilitySettings.largeFont && { fontSize: 14 },
-                    ]}
-                  >
-                    1 cápsula cada 12 horas - Duración: 3 días
-                  </Text>
-                </View>
-
-                <View style={styles.medicationItemPrescription}>
-                  <Text
-                    style={[
-                      styles.medicationName,
-                      styles.tempra,
-                      accessibilitySettings.largeFont && { fontSize: 16 },
-                    ]}
-                  >
-                    Tempra 250mg
-                  </Text>
-                  <Text
-                    style={[
-                      styles.medicationDosage,
-                      accessibilitySettings.largeFont && { fontSize: 14 },
-                    ]}
-                  >
-                    1 cápsula cada 12 horas - Duración: 2 días
-                  </Text>
-                </View>
+                {recetaMasReciente.medicamentos.map((med) => (
+                  <View key={med.id} style={styles.medicationItemPrescription}>
+                    <Text
+                      style={[
+                        styles.medicationName,
+                        getMedColorStyle(med.nombre_medicamento),
+                        accessibilitySettings.largeFont && { fontSize: 16 },
+                      ]}
+                    >
+                      {med.nombre_medicamento}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.medicationDosage,
+                        accessibilitySettings.largeFont && { fontSize: 14 },
+                      ]}
+                    >
+                      {med.dosis} • cada {med.frecuencia} horas • {med.duracion}
+                    </Text>
+                  </View>
+                ))}
+                
               </Pressable>
             </View>
 
@@ -904,9 +1093,9 @@ function PrescriptionScreen({ navigation }) {
   );
 }
 
-// Perfil
+// --- Perfil (MODIFICADO PARA CONECTAR A API) ---
 function ProfileScreen({ navigation }) {
-  const { accessibilitySettings, setAccessibilitySettings } = useContext(PrescriptionsContext);
+  const { accessibilitySettings, setAccessibilitySettings, user, setUser } = useContext(PrescriptionsContext);
 
   const toggleLargeFont = () =>
     setAccessibilitySettings((prev) => ({ ...prev, largeFont: !prev.largeFont }));
@@ -921,13 +1110,56 @@ function ProfileScreen({ navigation }) {
 
   const logout = useDualPress(() => {
     speakIfEnabled(accessibilitySettings, 'Cerrar sesión');
-    alert('Sesión cerrada exitosamente');
+    Alert.alert('Sesión cerrada', 'Sesión cerrada exitosamente');
+    setUser(null); // Limpiamos el usuario
     navigation.navigate('Login');
   });
 
   const photo = useDualPress();
   const personalInfo = useDualPress();
   const medicalInfo = useDualPress();
+
+  if (!user) {
+      return (
+        <View style={styles.screenContainer}>
+            <View style={styles.contentFrame}>
+                <View style={styles.container}>
+                    <Text style={{textAlign: 'center', padding: 20}}>Cargando perfil...</Text>
+                    <BottomNav
+                        navigation={navigation}
+                        accessibilitySettings={accessibilitySettings}
+                        active="profile"
+                    />
+                </View>
+            </View>
+        </View>
+      );
+  }
+
+  // --- AÑADIDO: Calcular edad ---
+  let edadCalculada = 'N/A';
+  if (user.fechaNacimiento) {
+      try {
+          const hoy = new Date();
+          const fechaNac = new Date(user.fechaNacimiento);
+          let edad = hoy.getFullYear() - fechaNac.getFullYear();
+          const m = hoy.getMonth() - fechaNac.getMonth();
+          if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) {
+              edad--;
+          }
+          edadCalculada = edad.toString() + " años";
+      } catch(e) { console.error("Error calculando edad"); }
+  }
+  
+  // --- AÑADIDO: Formatear fecha ---
+  let fechaNacFormateada = 'N/A';
+  if (user.fechaNacimiento) {
+      try {
+          const d = new Date(user.fechaNacimiento);
+          const options = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' };
+          fechaNacFormateada = d.toLocaleDateString('es-ES', options);
+      } catch(e) { console.error("Error formateando fecha"); }
+  }
 
   return (
     <View style={styles.screenContainer}>
@@ -993,7 +1225,7 @@ function ProfileScreen({ navigation }) {
                     accessibilitySettings.largeFont && { fontSize: 26 },
                   ]}
                 >
-                  Rafael Flores Lopez
+                  {user.nombreCompleto}
                 </Text>
                 <Text
                   style={[
@@ -1001,7 +1233,7 @@ function ProfileScreen({ navigation }) {
                     accessibilitySettings.largeFont && { fontSize: 18 },
                   ]}
                 >
-                  rafael.flores@email.com
+                  Clave: {user.claveUnica}
                 </Text>
               </Pressable>
 
@@ -1021,12 +1253,12 @@ function ProfileScreen({ navigation }) {
 
                 <View style={styles.profileGrid}>
                   {[
-                    ['Nombre(s)', 'Rafael'],
-                    ['Apellidos', 'Flores Lopez'],
-                    ['Sexo', 'Hombre'],
-                    ['Número Telefónico', '222 402 9740'],
-                    ['Dirección', 'AAAAAAA'],
-                    ['Fecha de Nacimiento', '12/09/2006'],
+                    ['Nombre(s)', user.nombreCompleto],
+                    ['Sexo', user.sexo || 'N/A'],
+                    ['Número Telefónico', user.telefono || 'N/A'],
+                    ['Dirección', user.direccion || 'N/A'],
+                    ['Fecha de Nacimiento', fechaNacFormateada],
+                    ['Edad', edadCalculada]
                   ].map(([label, value]) => (
                     <View key={label} style={styles.profileField}>
                       <Text
@@ -1049,7 +1281,7 @@ function ProfileScreen({ navigation }) {
                   ))}
                 </View>
               </Pressable>
-
+              
               <Pressable
                 style={styles.infoCard}
                 onPressIn={medicalInfo.handlePressIn}
@@ -1065,9 +1297,9 @@ function ProfileScreen({ navigation }) {
                 </Text>
 
                 {[
-                  ['Enfermedades Crónicas', 'Diabetes Tipo 45'],
-                  ['Tipo de Sangre', 'O+'],
-                  ['Alergias', 'Ninguna'],
+                  ['Enfermedades Crónicas', user.enfermedadesCronicas || 'Ninguna'],
+                  ['Tipo de Sangre', user.tipoSangre || 'N/A'],
+                  ['Alergias', user.alergias || 'Ninguna'],
                 ].map(([label, value]) => (
                   <View key={label} style={styles.profileField}>
                     <Text
@@ -1154,7 +1386,7 @@ function ProfileScreen({ navigation }) {
   );
 }
 
-// Cambiar contraseña
+// Cambiar contraseña (Sin cambios por ahora)
 function ChangePasswordScreen({ navigation }) {
   const [contrasenaActual, setContrasenaActual] = useState('');
   const [nuevaContrasena, setNuevaContrasena] = useState('');
@@ -1171,14 +1403,15 @@ function ChangePasswordScreen({ navigation }) {
     handleQuickPress: submitQuickPress,
   } = useDualPress(() => {
     if (!contrasenaActual || !nuevaContrasena || !confirmarContrasena) {
-      alert('Por favor completa todos los campos');
+      Alert.alert('Campos incompletos', 'Por favor completa todos los campos'); 
       return;
     }
     if (nuevaContrasena !== confirmarContrasena) {
-      alert('Las nuevas contraseñas no coinciden');
+      Alert.alert('Error', 'Las nuevas contraseñas no coinciden'); 
       return;
     }
-    alert('Contraseña actualizada exitosamente');
+    // TODO: Conectar esto a una API 'changePassword'
+    Alert.alert('Éxito', 'Contraseña actualizada exitosamente'); 
     navigation.navigate('Profile');
   });
 
@@ -1271,6 +1504,8 @@ function ChangePasswordScreen({ navigation }) {
 
 export default function App() {
   const [prescriptions, setPrescriptions] = useState([
+    // <-- MODIFICADO: Estos datos de ejemplo del calendario están bien por ahora
+    // (La pantalla de recetas ahora carga sus propios datos)
     {
       id: 1,
       nombre: 'Paracetamol',
@@ -1297,14 +1532,20 @@ export default function App() {
     largeFont: false,
     ttsEnabled: false,
   });
+  
+  // <-- AÑADIDO: Estado para guardar el usuario logueado
+  const [user, setUser] = useState(null);
 
   return (
+    // <-- MODIFICADO: Pasamos 'user' y 'setUser' al contexto
     <PrescriptionsContext.Provider
       value={{
         prescriptions,
         setPrescriptions,
         accessibilitySettings,
         setAccessibilitySettings,
+        user,
+        setUser
       }}
     >
       <NavigationContainer>
@@ -1316,6 +1557,7 @@ export default function App() {
             headerTitleStyle: { fontWeight: 'bold' },
           }}
         >
+          {/* (El Stack.Navigator no cambia) */}
           <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
           <Stack.Screen name="MainApp" component={MainAppScreen} options={{ headerShown: false }} />
