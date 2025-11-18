@@ -10,6 +10,8 @@ import {
   Image,
   Vibration,
   Linking,
+  Modal,
+  Platform,
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -70,6 +72,83 @@ const ScreenTitle = ({ children, accessibilitySettings }) => (
     {children}
   </Text>
 );
+
+// Selector reutilizable (Picker con comportamiento distinto por plataforma)
+const PickerField = ({ value, onChange, items, accessibilitySettings }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const selectedLabel =
+    items.find((i) => i.value === value)?.label || items[0]?.label || 'Elige una opción';
+
+  // iOS: input “falso” + modal con el picker
+  if (Platform.OS === 'ios') {
+    return (
+      <>
+        <Pressable
+          style={styles.iosPickerFakeInput}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text
+            style={[
+              styles.dateInputText,
+              accessibilitySettings.largeFont && { fontSize: 18 },
+              !value && { color: '#666' },
+            ]}
+          >
+            {selectedLabel}
+          </Text>
+          <Ionicons name="chevron-down" size={18} color="#666" />
+        </Pressable>
+
+        <Modal
+          visible={modalVisible}
+          transparent
+          animationType="slide"
+        >
+          <View style={styles.modalBackdrop}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Selecciona una opción</Text>
+                <Pressable onPress={() => setModalVisible(false)}>
+                  <Text style={styles.modalCloseText}>Cerrar</Text>
+                </Pressable>
+              </View>
+
+              <Picker
+                selectedValue={value}
+                onValueChange={(val) => {
+                  onChange(val);
+                  setModalVisible(false);
+                }}
+                itemStyle={accessibilitySettings.largeFont ? { fontSize: 18 } : {}}
+              >
+                {items.map((item) => (
+                  <Picker.Item key={item.value} label={item.label} value={item.value} />
+                ))}
+              </Picker>
+            </View>
+          </View>
+        </Modal>
+      </>
+    );
+  }
+
+  // Android: dropdown como siempre
+  return (
+    <View style={styles.pickerContainer}>
+      <Picker
+        selectedValue={value}
+        onValueChange={onChange}
+        style={[styles.picker, accessibilitySettings.largeFont && { fontSize: 18 }]}
+        itemStyle={accessibilitySettings.largeFont ? { fontSize: 18 } : {}}
+      >
+        {items.map((item) => (
+          <Picker.Item key={item.value} label={item.label} value={item.value} />
+        ))}
+      </Picker>
+    </View>
+  );
+};
 
 // Barra de navegación inferior reutilizable
 const BottomNav = ({ navigation, accessibilitySettings, active }) => {
@@ -142,22 +221,6 @@ const BottomNav = ({ navigation, accessibilitySettings, active }) => {
     </View>
   );
 };
-
-// Selector reutilizable (Picker con contenedor)
-const PickerField = ({ value, onChange, items, accessibilitySettings }) => (
-  <View style={styles.pickerContainer}>
-    <Picker
-      selectedValue={value}
-      onValueChange={onChange}
-      style={[styles.picker, accessibilitySettings.largeFont && { fontSize: 18 }]}
-      itemStyle={accessibilitySettings.largeFont ? { fontSize: 18 } : {}}
-    >
-      {items.map((item) => (
-        <Picker.Item key={item.value} label={item.label} value={item.value} />
-      ))}
-    </Picker>
-  </View>
-);
 
 /* ===================== PANTALLAS ===================== */
 
@@ -545,19 +608,27 @@ function RequestAppointmentScreen({ navigation }) {
 
   const { accessibilitySettings } = useContext(PrescriptionsContext);
 
-  const { isPressing: submitPressing, handlePressIn: submitPressIn, handlePressOut: submitPressOut, handleQuickPress: submitQuickPress } =
-    useDualPress(() => {
-      if (motivoConsulta && prioridad && doctor) {
-        alert('Consulta solicitada exitosamente');
-        navigation.navigate('MainApp');
-      } else {
-        alert('Por favor completa todos los campos');
-      }
-    });
+  const {
+    isPressing: submitPressing,
+    handlePressIn: submitPressIn,
+    handlePressOut: submitPressOut,
+    handleQuickPress: submitQuickPress,
+  } = useDualPress(() => {
+    if (motivoConsulta && prioridad && doctor) {
+      alert('Consulta solicitada exitosamente');
+      navigation.navigate('MainApp');
+    } else {
+      alert('Por favor completa todos los campos');
+    }
+  });
 
   const onDateChange = (_, selectedDate) => {
-    setShowDatePicker(false);
-    selectedDate && setFechaConsulta(selectedDate);
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+    if (selectedDate) {
+      setFechaConsulta(selectedDate);
+    }
   };
 
   const formatDate = (date) => date.toISOString().split('T')[0].replace(/-/g, '/');
@@ -584,7 +655,7 @@ function RequestAppointmentScreen({ navigation }) {
               </Text>
               <Pressable
                 style={styles.dateInput}
-                onPress={() => setShowDatePicker(true)}
+                onPress={() => setShowDatePicker((prev) => !prev)}
               >
                 <Text
                   style={[
@@ -601,7 +672,7 @@ function RequestAppointmentScreen({ navigation }) {
                 <DateTimePicker
                   value={fechaConsulta}
                   mode="date"
-                  display="default"
+                  display={Platform.OS === 'ios' ? 'inline' : 'default'}
                   onChange={onDateChange}
                 />
               )}
@@ -1539,6 +1610,7 @@ const styles = StyleSheet.create({
   },
   dateInputText: { color: '#000', fontSize: 16 },
 
+  // Android picker container
   pickerContainer: {
     backgroundColor: '#ffffff',
     borderRadius: 8,
@@ -1551,6 +1623,51 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   picker: { height: 54, fontSize: 16 },
+
+  // “Input” falso para iOS (picker)
+  iosPickerFakeInput: {
+    backgroundColor: '#ffffff',
+    padding: 12,
+    borderRadius: 5,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  // Modal para iOS picker
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000',
+  },
+  modalCloseText: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '500',
+  },
 
   infoCard: {
     backgroundColor: '#ffffff',
