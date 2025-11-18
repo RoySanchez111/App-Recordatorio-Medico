@@ -1253,6 +1253,78 @@ export default function App() {
   );
 }
 
+// Barra de navegación inferior reutilizable
+const BottomNav = ({ navigation, accessibilitySettings, active }) => {
+  const navCalendar = useDualPress(() => {
+    speakIfEnabled(accessibilitySettings, 'Calendario Health');
+    navigation.navigate('MainApp');
+  });
+  const navRequest = useDualPress(() => {
+    speakIfEnabled(accessibilitySettings, 'Solicitar consulta');
+    navigation.navigate('RequestAppointment');
+  });
+  const navPrescription = useDualPress(() => {
+    speakIfEnabled(accessibilitySettings, 'Receta');
+    navigation.navigate('Prescription');
+  });
+  const navProfile = useDualPress(() => {
+    speakIfEnabled(accessibilitySettings, 'Perfil');
+    navigation.navigate('Profile');
+  });
+
+  const iconColor = (tab) => (active === tab ? '#007AFF' : '#666');
+
+  const textStyle = (tab) => [
+    styles.navText,
+    active === tab && styles.activeNavText,
+    accessibilitySettings.largeFont && { fontSize: 12 },
+  ];
+
+  return (
+    <View style={styles.bottomNavigation}>
+      <Pressable
+        style={styles.navItem}
+        onPress={navCalendar.handleQuickPress}
+        onPressIn={navCalendar.handlePressIn}
+        onPressOut={navCalendar.handlePressOut}
+      >
+        <Ionicons name="calendar" size={24} color={iconColor('calendar')} />
+        <Text style={textStyle('calendar')}>Calendario{'\n'}Health</Text>
+      </Pressable>
+
+      <Pressable
+        style={styles.navItem}
+        onPress={navRequest.handleQuickPress}
+        onPressIn={navRequest.handlePressIn}
+        onPressOut={navRequest.handlePressOut}
+      >
+        <Ionicons name="add-circle" size={24} color={iconColor('request')} />
+        <Text style={textStyle('request')}>Solicitar{'\n'}Consulta</Text>
+      </Pressable>
+
+      <Pressable
+        style={styles.navItem}
+        onPress={navPrescription.handleQuickPress}
+        onPressIn={navPrescription.handlePressIn}
+        onPressOut={navPrescription.handlePressOut}
+      >
+        <Ionicons name="document-text" size={24} color={iconColor('prescription')} />
+        <Text style={textStyle('prescription')}>Receta</Text>
+      </Pressable>
+
+      <Pressable
+        style={styles.navItem}
+        onPress={navProfile.handleQuickPress}
+        onPressIn={navProfile.handlePressIn}
+        onPressOut={navProfile.handlePressOut}
+      >
+        <Ionicons name="person" size={24} color={iconColor('profile')} />
+        <Text style={textStyle('profile')}>Perfil</Text>
+      </Pressable>
+    </View>
+  );
+};
+
 /* ===================== ESTILOS ===================== */
 
 const styles = StyleSheet.create({
