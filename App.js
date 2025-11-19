@@ -1178,28 +1178,7 @@ function ChangePasswordScreen({ navigation }) {
 /* ===================== APP PRINCIPAL ===================== */
 
 export default function App() {
-  const [prescriptions, setPrescriptions] = useState([
-    {
-      id: 1,
-      nombre: 'Paracetamol',
-      inicio: new Date(),
-      fin: new Date(new Date().setDate(new Date().getDate() + 7)),
-      horarios: ['08:00', '20:00'],
-      stock: 14,
-      dosisPorToma: 1,
-      esLargoPlazo: true,
-    },
-    {
-      id: 2,
-      nombre: 'Ibuprofeno',
-      inicio: new Date(),
-      fin: new Date(new Date().setDate(new Date().getDate() + 5)),
-      horarios: ['12:00'],
-      stock: 5,
-      dosisPorToma: 1,
-      esLargoPlazo: true,
-    },
-  ]);
+  const [prescriptions, setPrescriptions] = useState([]);
 
   const [accessibilitySettings, setAccessibilitySettings] = useState({
     largeFont: false,
