@@ -232,7 +232,7 @@ export const RequestAppointmentScreen = ({ navigation }) => {
                 />
               </View>
 
-              {/* BOTÓN ENVIAR */}
+              {/* BOTÓN ENVIAR CON DELAY */}
               <Pressable
                 style={({ pressed }) => [
                   styles.button,
@@ -240,7 +240,11 @@ export const RequestAppointmentScreen = ({ navigation }) => {
                   (submitPressing || loading) && styles.navButtonActive,
                   { marginTop: 10 }
                 ]}
-                onPress={handleSubmitConsulta}
+                onPress={() => {
+                  setTimeout(() => {
+                    handleSubmitConsulta();
+                  }, 500);
+                }}
                 onPressIn={submitPressIn}
                 onPressOut={submitPressOut}
                 disabled={loading} 
