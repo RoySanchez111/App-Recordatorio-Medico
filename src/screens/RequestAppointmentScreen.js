@@ -6,65 +6,85 @@ import { PrescriptionsContext } from '../contexts/AppContext';
 import { useDualPress } from '../hooks/useDualPress';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { BottomNav } from '../components/BottomNav';
-import { PickerField } from '../components/PickerField';
-import { apiRequest } from '../utils/api';
+// import { PickerField } from '../components/PickerField'; // YA NO LO NECESITAMOS PARA ESTO
 import { calculateAge } from '../utils/dateUtils';
 import { styles } from '../styles/styles';
+
+// Tu URL de Lambda Corregida
+const API_URL = "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
 
 export const RequestAppointmentScreen = ({ navigation }) => {
   const [fechaConsulta, setFechaConsulta] = useState(new Date());
   const [motivoConsulta, setMotivoConsulta] = useState('');
   const [sintomas, setSintomas] = useState('');
   const [prioridad, setPrioridad] = useState('');
-  const [doctor, setDoctor] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false); 
 
   const { accessibilitySettings, user } = useContext(PrescriptionsContext);
 
   const handleSubmitConsulta = async () => {
-    if (!motivoConsulta || !prioridad || !doctor ) {
-      Alert.alert('Campos incompletos', 'Por favor completa todos los campos');
+    if (!motivoConsulta || !prioridad) {
+      Alert.alert('Campos incompletos', 'Por favor describe el motivo y la prioridad.');
       return;
     }
     
     if (!user || !user.id) {
       Alert.alert('Error de Sesión', 'No se pudo identificar al paciente. Por favor, inicia sesión de nuevo.');
-      navigation.navigate('Login');
+      return;
+    }
+
+    if (!user.id_doctor) {
+      Alert.alert('Error', 'Tu cuenta no tiene un médico asignado correctamente. Contacta a soporte.');
       return;
     }
     
     setLoading(true);
 
-    const doctorData = {
-        id: "2",
-        nombre: "Doctor"
-    };
-
-    const edadCalculada = calculateAge(user.fechaNacimiento) || 25;
+    const edadCalculada = user.fechaNacimiento ? calculateAge(user.fechaNacimiento) : 'N/A';
 
     const payload = {
       id_paciente: user.id,
       pacienteNombre: user.nombreCompleto,
       edad: edadCalculada, 
       telefono: user.telefono || 'N/A',
-      id_doctor: doctorData.id,
-      doctorNombre: doctorData.nombre,
-      especialidad: "General",
+      id_doctor: user.id_doctor, 
       fecha: fechaConsulta.toISOString(),
       motivo: motivoConsulta,
       sintomas: sintomas,
       status: "pendiente",
-      prioridad: prioridad
+      prioridad: prioridad,
+      fechaCreacion: new Date().toISOString()
     };
 
     try {
-      await apiRequest("createConsulta", payload);
-      Alert.alert('Éxito', 'Consulta solicitada exitosamente');
-      navigation.navigate('MainApp');
+      const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              action: 'createConsulta',
+              data: payload
+          })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        Alert.alert(
+            'Solicitud Enviada', 
+            'Tu doctor ha recibido la solicitud de consulta.',
+            [{ text: 'OK', onPress: () => navigation.navigate('MainApp') }]
+        );
+        setMotivoConsulta('');
+        setSintomas('');
+        setPrioridad('');
+      } else {
+        throw new Error(result.message || 'Error al solicitar consulta');
+      }
 
     } catch (err) {
-      Alert.alert('Error', err.message || 'No se pudo conectar al servidor.');
+      console.error("Error creando consulta:", err);
+      Alert.alert('Error', 'No se pudo conectar al servidor. Intente más tarde.');
     } finally {
       setLoading(false);
     }
@@ -83,6 +103,38 @@ export const RequestAppointmentScreen = ({ navigation }) => {
 
   const formatDate = (date) => date.toISOString().split('T')[0].replace(/-/g, '/');
 
+  // Componente interno para los botones de prioridad (Estilo Chips)
+  const PriorityButton = ({ label, value, color, isSelected, onPress }) => (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flex: 1,
+        paddingVertical: 12,
+        paddingHorizontal: 5,
+        marginHorizontal: 4,
+        borderRadius: 8,
+        backgroundColor: isSelected ? color : '#f0f0f0',
+        borderWidth: 1,
+        borderColor: isSelected ? color : '#ddd',
+        alignItems: 'center',
+        opacity: pressed ? 0.7 : 1,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: isSelected ? 0.2 : 0,
+        shadowRadius: 1.41,
+        elevation: isSelected ? 2 : 0,
+      })}
+    >
+      <Text style={{
+        color: isSelected ? 'white' : '#555',
+        fontWeight: isSelected ? 'bold' : 'normal',
+        fontSize: accessibilitySettings.largeFont ? 16 : 14
+      }}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+
   return (
     <View style={styles.screenContainer}>
       <View style={styles.contentFrame}>
@@ -92,11 +144,12 @@ export const RequestAppointmentScreen = ({ navigation }) => {
 
             <View style={styles.requestForm}>
               <ScreenTitle accessibilitySettings={accessibilitySettings}>
-                Solicitar Consulta - Health Reminder
+                Solicitar Consulta
               </ScreenTitle>
 
+              {/* CAMPO FECHA */}
               <Text style={[styles.label, accessibilitySettings.largeFont && { fontSize: 16 }]}>
-                Fecha de la consulta
+                Fecha deseada
               </Text>
               <Pressable
                 style={styles.dateInput}
@@ -114,16 +167,18 @@ export const RequestAppointmentScreen = ({ navigation }) => {
                   value={fechaConsulta}
                   mode="date"
                   display="default"
+                  minimumDate={new Date()} 
                   onChange={onDateChange}
                 />
               )}
 
+              {/* CAMPO MOTIVO */}
               <Text style={[styles.label, accessibilitySettings.largeFont && { fontSize: 16 }]}>
-                Motivo de la Consulta
+                Motivo de la Consulta *
               </Text>
               <TextInput
                 style={[styles.textInput, styles.multilineInput, accessibilitySettings.largeFont && { fontSize: 18 }]}
-                placeholder="Describe el motivo de tu consulta"
+                placeholder="Ej. Dolor de cabeza persistente..."
                 placeholderTextColor="#666"
                 value={motivoConsulta}
                 onChangeText={setMotivoConsulta}
@@ -133,12 +188,13 @@ export const RequestAppointmentScreen = ({ navigation }) => {
                 editable={!loading}
               />
 
+              {/* CAMPO SÍNTOMAS */}
               <Text style={[styles.label, accessibilitySettings.largeFont && { fontSize: 16 }]}>
                 Síntomas (opcional)
               </Text>
               <TextInput
                 style={[styles.textInput, styles.multilineInput, accessibilitySettings.largeFont && { fontSize: 18 }]}
-                placeholder="Describe tus síntomas"
+                placeholder="Describe tus síntomas detalladamente"
                 placeholderTextColor="#666"
                 value={sintomas}
                 onChangeText={setSintomas}
@@ -148,39 +204,41 @@ export const RequestAppointmentScreen = ({ navigation }) => {
                 editable={!loading}
               />
               
+              {/* SELECCIÓN DE PRIORIDAD - CORREGIDO PARA IOS/ANDROID */}
               <Text style={[styles.label, accessibilitySettings.largeFont && { fontSize: 16 }]}>
-                Nivel de prioridad
+                Nivel de prioridad *
               </Text>
-              <PickerField
-                value={prioridad}
-                onChange={setPrioridad}
-                accessibilitySettings={accessibilitySettings}
-                items={[
-                  { label: 'Elige una opción', value: '' },
-                  { label: 'Baja', value: 'baja' },
-                  { label: 'Media', value: 'media' },
-                  { label: 'Alta', value: 'alta' },
-                ]}
-              />
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5, marginBottom: 20 }}>
+                <PriorityButton 
+                  label="Baja" 
+                  value="baja" 
+                  color="#27ae60" // Verde
+                  isSelected={prioridad === 'baja'} 
+                  onPress={() => setPrioridad('baja')} 
+                />
+                <PriorityButton 
+                  label="Media" 
+                  value="media" 
+                  color="#f39c12" // Naranja
+                  isSelected={prioridad === 'media'} 
+                  onPress={() => setPrioridad('media')} 
+                />
+                <PriorityButton 
+                  label="Alta" 
+                  value="alta" 
+                  color="#c0392b" // Rojo
+                  isSelected={prioridad === 'alta'} 
+                  onPress={() => setPrioridad('alta')} 
+                />
+              </View>
 
-              <Text style={[styles.label, accessibilitySettings.largeFont && { fontSize: 16 }]}>
-                Nombre del Doctor Encargado
-              </Text>
-              <PickerField
-                value={doctor}
-                onChange={setDoctor}
-                accessibilitySettings={accessibilitySettings}
-                items={[
-                  { label: 'Elija una opción', value: '' },
-                  { label: 'Doctor (Prueba)', value: 'medico1' },
-                ]}
-              />
-
+              {/* BOTÓN ENVIAR */}
               <Pressable
                 style={({ pressed }) => [
                   styles.button,
                   pressed && styles.buttonPressed,
                   (submitPressing || loading) && styles.navButtonActive,
+                  { marginTop: 10 }
                 ]}
                 onPress={handleSubmitConsulta}
                 onPressIn={submitPressIn}
@@ -188,7 +246,7 @@ export const RequestAppointmentScreen = ({ navigation }) => {
                 disabled={loading} 
               >
                 <Text style={[styles.buttonText, accessibilitySettings.largeFont && { fontSize: 18 }]}>
-                  {loading ? 'Enviando...' : (submitPressing ? 'Mantén...' : 'Solicitar')}
+                  {loading ? 'Enviando...' : (submitPressing ? 'Confirmando...' : 'Solicitar Cita')}
                 </Text>
               </Pressable>
             </View>
