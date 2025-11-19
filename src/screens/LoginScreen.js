@@ -3,6 +3,7 @@ import { View, Text, Pressable, TextInput, Image, Alert } from 'react-native';
 import { PrescriptionsContext } from '../contexts/AppContext';
 import { useDualPress } from '../hooks/useDualPress';
 import { ScreenTitle } from '../components/ScreenTitle';
+import { apiRequest } from '../utils/api';
 import { styles } from '../styles/styles';
 
 const heartbeatLogo = require('../../assets/heartbeat_logo.png');
@@ -22,25 +23,19 @@ export const LoginScreen = ({ navigation }) => {
     setLoading(true);
 
     try {
-      // Simular login exitoso
-      const userData = {
-        id: "1",
-        nombreCompleto: "Rafael Flores Lopez",
+      const data = await apiRequest("login", {
         claveUnica: claveUnica,
-        esPaciente: true,
-        fechaNacimiento: "2006-09-12",
-        telefono: "222 402 9740",
-        direccion: "AAAAAAA",
-        sexo: "Hombre",
-        enfermedadesCronicas: "Diabetes Tipo 45",
-        tipoSangre: "O+",
-        alergias: "Ninguna"
-      };
+        password: contrasena
+      });
       
-      Alert.alert('Ingreso exitoso', `Bienvenido(a) ${userData.nombreCompleto}`);
-      setUser(userData);
-      navigation.navigate('MainApp');
-      
+      if (data.user && data.user.esPaciente) {
+        Alert.alert('Ingreso exitoso', `Bienvenido(a) ${data.user.nombreCompleto}`);
+        setUser(data.user);
+        navigation.navigate('MainApp');
+      } else {
+        throw new Error("Este usuario no es un paciente.");
+      }
+
     } catch (err) {
       Alert.alert('Error de Login', err.message || 'No se pudo conectar al servidor.');
     } finally {
