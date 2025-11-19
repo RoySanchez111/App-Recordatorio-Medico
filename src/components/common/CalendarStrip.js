@@ -1,19 +1,9 @@
 import React from 'react';
-import { ScrollView, Pressable, Text, View } from 'react-native';
-import { formatDate, getFiveDayWindow } from '../../utils/dateUtils';
+import { View, Text, Pressable, ScrollView } from 'react-native';
+import { getFiveDayWindow } from '../../utils/dateUtils';
 import { styles } from '../../styles/styles';
 
 const weekDays = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
-
-const getMedColorStyle = (nombre) => {
-  if (!nombre) return null;
-  const n = nombre.toLowerCase();
-  if (n.includes('paracetamol')) return styles.paracetamol;
-  if (n.includes('ibuprofeno')) return styles.ibuprofeno;
-  if (n.includes('naproxeno')) return styles.naproxeno;
-  if (n.includes('tempra')) return styles.tempra;
-  return null;
-};
 
 export const CalendarStrip = ({ 
   currentDate, 
@@ -22,6 +12,8 @@ export const CalendarStrip = ({
   medications, 
   accessibilitySettings 
 }) => {
+  const formatDate = (date) => date.toISOString().slice(0, 10);
+  
   const getMedsForDate = (date) => {
     const d = formatDate(date);
     return medications.filter((med) => {
@@ -30,6 +22,16 @@ export const CalendarStrip = ({
       const fin = formatDate(new Date(med.fin));
       return d >= inicio && d <= fin;
     });
+  };
+
+  const getMedColorStyle = (nombre) => {
+    if (!nombre) return null;
+    const n = nombre.toLowerCase();
+    if (n.includes('paracetamol')) return styles.paracetamol;
+    if (n.includes('ibuprofeno')) return styles.ibuprofeno;
+    if (n.includes('naproxeno')) return styles.naproxeno;
+    if (n.includes('tempra')) return styles.tempra;
+    return null;
   };
 
   const windowDays = getFiveDayWindow(currentDate);
@@ -47,16 +49,10 @@ export const CalendarStrip = ({
             style={[styles.dayChip, isSelected && styles.dayChipSelected]}
             onPress={() => onSelectDate(dateObj)}
           >
-            <Text style={[
-              styles.dayChipDow,
-              accessibilitySettings.largeFont && { fontSize: 13 },
-            ]}>
+            <Text style={[styles.dayChipDow, accessibilitySettings.largeFont && { fontSize: 13 }]}>
               {weekDays[dateObj.getDay()]}
             </Text>
-            <Text style={[
-              styles.dayChipNumber,
-              accessibilitySettings.largeFont && { fontSize: 20 },
-            ]}>
+            <Text style={[styles.dayChipNumber, accessibilitySettings.largeFont && { fontSize: 20 }]}>
               {dateObj.getDate()}
             </Text>
 

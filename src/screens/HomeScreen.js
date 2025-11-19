@@ -5,15 +5,22 @@ import { PrescriptionsContext } from '../contexts/AppContext';
 import { useDualPress } from '../hooks/useDualPress';
 import { styles } from '../styles/styles';
 
+// Logo - usa la ruta correcta
 const heartbeatLogo = require('../../assets/heartbeat_logo.png');
 
 export const HomeScreen = ({ navigation }) => {
   const emergencyNumber = '911';
   const { accessibilitySettings } = useContext(PrescriptionsContext);
 
-  const { isPressing, handlePressIn, handlePressOut, handleQuickPress } = useDualPress(
+  const { isPressing, handlePressIn, handlePressOut } = useDualPress(
     () => navigation.navigate('Login'),
-    () => Linking.openURL(`tel:${emergencyNumber}`),
+    () => {
+      if (Linking.canOpenURL(`tel:${emergencyNumber}`)) {
+        Linking.openURL(`tel:${emergencyNumber}`);
+      } else {
+        alert(`Llamada de emergencia: ${emergencyNumber}`);
+      }
+    },
     5000,
     1000
   );
@@ -42,12 +49,12 @@ export const HomeScreen = ({ navigation }) => {
               pressed && styles.navButtonPressed,
               isPressing && styles.navButtonActive,
             ]}
-            onPress={handleQuickPress}
+            onPress={() => navigation.navigate('Login')}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
           >
             <Text style={[styles.buttonText, accessibilitySettings.largeFont && { fontSize: 18 }]}>
-              {isPressing ? 'Suelta para cancelar vibración' : 'Iniciar Health Reminder'}
+              {isPressing ? 'Suelta para cancelar' : 'Iniciar Health Reminder'}
             </Text>
           </Pressable>
 

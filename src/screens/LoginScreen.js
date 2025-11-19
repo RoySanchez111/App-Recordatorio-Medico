@@ -3,7 +3,6 @@ import { View, Text, Pressable, TextInput, Image, Alert } from 'react-native';
 import { PrescriptionsContext } from '../contexts/AppContext';
 import { useDualPress } from '../hooks/useDualPress';
 import { ScreenTitle } from '../components/ScreenTitle';
-import { apiRequest } from '../utils/api';
 import { styles } from '../styles/styles';
 
 const heartbeatLogo = require('../../assets/heartbeat_logo.png');
@@ -23,19 +22,25 @@ export const LoginScreen = ({ navigation }) => {
     setLoading(true);
 
     try {
-      const data = await apiRequest("login", {
+      // Simular login exitoso
+      const userData = {
+        id: "1",
+        nombreCompleto: "Rafael Flores Lopez",
         claveUnica: claveUnica,
-        password: contrasena
-      });
+        esPaciente: true,
+        fechaNacimiento: "2006-09-12",
+        telefono: "222 402 9740",
+        direccion: "AAAAAAA",
+        sexo: "Hombre",
+        enfermedadesCronicas: "Diabetes Tipo 45",
+        tipoSangre: "O+",
+        alergias: "Ninguna"
+      };
       
-      if (data.user && data.user.esPaciente) {
-        Alert.alert('Ingreso exitoso', `Bienvenido(a) ${data.user.nombreCompleto}`);
-        setUser(data.user);
-        navigation.navigate('MainApp'); 
-      } else {
-        throw new Error("Este usuario no es un paciente.");
-      }
-
+      Alert.alert('Ingreso exitoso', `Bienvenido(a) ${userData.nombreCompleto}`);
+      setUser(userData);
+      navigation.navigate('MainApp');
+      
     } catch (err) {
       Alert.alert('Error de Login', err.message || 'No se pudo conectar al servidor.');
     } finally {
@@ -43,10 +48,7 @@ export const LoginScreen = ({ navigation }) => {
     }
   };
 
-  const { isPressing, handlePressIn, handlePressOut } = useDualPress(
-    handleLogin, 
-    () => console.log('Long press login') // Puedes agregar vibración aquí si quieres
-  );
+  const { isPressing, handlePressIn, handlePressOut } = useDualPress(handleLogin);
 
   return (
     <View style={styles.screenContainer}>
@@ -72,7 +74,7 @@ export const LoginScreen = ({ navigation }) => {
               onChangeText={setClaveUnica}
               autoCapitalize="none"
               autoCorrect={false}
-              editable={!loading} 
+              editable={!loading}
             />
 
             <Text style={[styles.label, accessibilitySettings.largeFont && { fontSize: 16 }]}>
@@ -87,7 +89,7 @@ export const LoginScreen = ({ navigation }) => {
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
-              editable={!loading} 
+              editable={!loading}
             />
 
             <Pressable
@@ -96,9 +98,10 @@ export const LoginScreen = ({ navigation }) => {
                 pressed && styles.buttonPressed,
                 (isPressing || loading) && styles.navButtonActive,
               ]}
+              onPress={handleLogin}
               onPressIn={handlePressIn}
               onPressOut={handlePressOut}
-              disabled={loading} 
+              disabled={loading}
             >
               <Text style={[styles.buttonText, accessibilitySettings.largeFont && { fontSize: 18 }]}>
                 {loading ? 'Ingresando...' : (isPressing ? 'Mantén...' : 'Ingresar')}

@@ -4,128 +4,35 @@ export const styles = StyleSheet.create({
   // ===================== GENERALES / LAYOUT =====================
   screenContainer: {
     flex: 1,
-    backgroundColor: '#f8f8f8', // Fondo general más claro
+    backgroundColor: '#ffffff',
+    paddingTop: 25,
+    paddingBottom: 35,
+    paddingHorizontal: 10,
   },
-  contentFrame: {
-    flex: 1,
-    backgroundColor: '#f8f8f8',
-    position: 'relative', // Para contener el BottomNav
+  contentFrame: { 
+    flex: 1, 
+    backgroundColor: '#ffffff' 
   },
-  container: {
-    flex: 1,
-    paddingHorizontal: 15,
+  container: { 
+    flex: 1 
   },
-  scrollContent: {
-    paddingBottom: 80, // Espacio para el BottomNav
+  scrollContent: { 
+    flex: 1 
   },
-  invisiblePadding: {
-    height: 25,
+  invisiblePadding: { 
+    height: 25 
   },
-  extraBottomPadding: {
-    height: 100, // Más espacio al final de formularios/scrolls
+  extraBottomPadding: { 
+    height: 40 
   },
   section: {
-    marginBottom: 25,
-  },
-
-  // ===================== TÍTULOS Y TEXTOS =====================
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 15,
-  },
-  sectionTitleLarge: {
-    fontSize: 28, // Estilo para fuente grande
-  },
-  label: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 5,
-    fontWeight: '500',
-  },
-  instructionText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 20,
-    marginBottom: 30,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
-    paddingVertical: 20,
-  },
-
-  // ===================== INPUTS / FORMULARIOS =====================
-  textInput: {
-    height: 45,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 15,
-    backgroundColor: '#fff',
-    fontSize: 16,
-    color: '#333',
-  },
-  multilineInput: {
-    height: 100,
-    paddingTop: 12,
-  },
-  dateInput: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    height: 45,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 15,
-    backgroundColor: '#fff',
-  },
-  dateInputText: {
-    fontSize: 16,
-    color: '#333',
-  },
-
-  // ===================== BOTONES =====================
-  button: {
-    backgroundColor: '#007AFF', // Azul primario
-    padding: 15,
+    padding: 18,
+    backgroundColor: '#f8f9fa',
+    margin: 12,
     borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 15,
-  },
-  buttonPressed: {
-    backgroundColor: '#005bb5', // Azul más oscuro al presionar
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  navButton: {
-    backgroundColor: '#007AFF',
-    padding: 20,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 30,
-    width: '100%',
-  },
-  navButtonPressed: {
-    backgroundColor: '#005bb5',
-  },
-  navButtonActive: {
-    // Estilo para indicar toque largo / carga
-    backgroundColor: '#FF9500', // Naranja
   },
 
-  // ===================== PANTALLA DE HOME =====================
+  // ===================== PANTALLAS ESPECÍFICAS =====================
   homeContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -134,150 +41,460 @@ export const styles = StyleSheet.create({
     paddingBottom: 50,
     paddingHorizontal: 20,
   },
-  homeLogoSection: {
-    marginBottom: 40,
-  },
-  homeLogoImage: {
-    width: 150,
-    height: 150,
-  },
-  homeTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-
-  // ===================== PANTALLA DE LOGIN =====================
   loginContainer: {
     flex: 1,
-    paddingHorizontal: 25,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 30,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
   },
-  logoSection: {
+  requestContainer: { 
+    flex: 1 
+  },
+  prescriptionContainer: { 
+    maxWidth: 400, 
+    alignSelf: 'center', 
+    width: '100%', 
+    padding: 10 
+  },
+  profileContainer: { 
+    maxWidth: 400, 
+    alignSelf: 'center', 
+    width: '100%', 
+    padding: 10 
+  },
+  passwordContainer: { 
+    maxWidth: 400, 
+    alignSelf: 'center', 
+    width: '100%', 
+    padding: 10 
+  },
+
+  // ===================== SCROLL CONTENT =====================
+  prescriptionScrollContent: { 
+    flexGrow: 1, 
+    justifyContent: 'center', 
+    padding: 15 
+  },
+  profileScrollContent: { 
+    flexGrow: 1, 
+    padding: 15 
+  },
+  passwordScrollContent: { 
+    flexGrow: 1, 
+    justifyContent: 'center', 
+    padding: 15 
+  },
+  requestScrollContent: { 
+    flexGrow: 1, 
+    justifyContent: 'center', 
+    paddingVertical: 10 
+  },
+
+  // ===================== TÍTULOS Y TEXTOS =====================
+  sectionTitle: {
+    color: '#000',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  sectionTitleLarge: { 
+    fontSize: 24 
+  },
+  label: {
+    color: '#000',
+    fontSize: 14,
+    marginBottom: 5,
+    marginTop: 10,
+    fontWeight: '500',
+  },
+  instructionText: {
+    color: '#666',
+    fontSize: 14,
+    textAlign: 'center',
     marginBottom: 30,
+    fontStyle: 'italic',
   },
-  logoImage: {
-    width: 120,
-    height: 120,
+  emptyText: { 
+    color: '#666', 
+    fontSize: 14, 
+    textAlign: 'center', 
+    paddingVertical: 8 
+  },
+
+  // ===================== HOME SCREEN =====================
+  homeLogoSection: { 
+    padding: 20, 
+    alignItems: 'center', 
+    marginBottom: 20 
+  },
+  homeLogoImage: { 
+    width: 150, 
+    height: 150 
+  },
+  homeTitle: {
+    color: '#000',
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+
+  // ===================== LOGIN SCREEN =====================
+  logoSection: {
+    padding: 30,
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    marginBottom: 25,
+    borderRadius: 10,
+    width: '100%',
+    maxWidth: 400,
+  },
+  logoImage: { 
+    width: 120, 
+    height: 120 
   },
   loginForm: {
     width: '100%',
-    maxWidth: 350,
+    maxWidth: 400,
+    backgroundColor: '#f8f9fa',
+    padding: 25,
+    borderRadius: 10,
+  },
+  requestForm: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 25,
+    maxWidth: 400,
+    alignSelf: 'center',
+    width: '100%',
   },
 
-  // ===================== PANTALLA PRINCIPAL (MAIN APP) =====================
-  // Alerta de Stock
-  alertBox: {
-    backgroundColor: '#FFFBEA', // Amarillo claro
-    borderColor: '#FFD700', // Amarillo oscuro
-    borderWidth: 1,
+  // ===================== INPUTS / FORMULARIOS =====================
+  textInput: {
+    backgroundColor: '#ffffff',
+    padding: 12,
+    borderRadius: 5,
+    marginBottom: 10,
+    color: '#000',
+    fontSize: 16,
+  },
+  multilineInput: { 
+    minHeight: 80, 
+    textAlignVertical: 'top' 
+  },
+  dateInput: {
+    backgroundColor: '#ffffff',
+    padding: 12,
+    borderRadius: 5,
+    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dateInputText: { 
+    color: '#000', 
+    fontSize: 16 
+  },
+
+  // ===================== PICKER =====================
+  pickerContainer: {
+    backgroundColor: '#ffffff',
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    marginTop: 10,
+    marginBottom: 10,
+    height: 54,
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  picker: { 
+    height: 54, 
+    fontSize: 16 
+  },
+
+  // ===================== BOTONES =====================
+  button: {
+    backgroundColor: '#007AFF',
     padding: 15,
-    marginBottom: 25,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 20,
   },
-  alertTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#FF9500',
-    marginBottom: 5,
+  buttonPressed: { 
+    backgroundColor: '#0056CC', 
+    transform: [{ scale: 0.95 }] 
   },
-  alertText: {
-    fontSize: 12,
-    color: '#333',
+  buttonText: { 
+    color: '#fff', 
+    fontSize: 16, 
+    fontWeight: 'bold' 
+  },
+  navButton: {
+    backgroundColor: '#007AFF',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '80%',
+    maxWidth: 300,
+  },
+  navButtonPressed: { 
+    backgroundColor: '#0056CC', 
+    transform: [{ scale: 0.95 }] 
+  },
+  navButtonActive: { 
+    backgroundColor: '#004499' 
+  },
+
+  // ===================== MAIN APP SCREEN =====================
+  alertBox: {
+    backgroundColor: '#FFF4E5',
+    borderRadius: 8,
+    padding: 12,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#FFC107',
+  },
+  alertTitle: { 
+    fontWeight: 'bold', 
+    marginBottom: 4, 
+    color: '#E65100' 
+  },
+  alertText: { 
+    fontSize: 13, 
+    color: '#5D4037' 
   },
 
   // Calendario
-  fiveDayStrip: {
-    flexDirection: 'row',
-    marginVertical: 10,
-    paddingVertical: 5,
+  fiveDayStrip: { 
+    marginTop: 10 
   },
   dayChip: {
-    width: 60,
-    height: 80,
-    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    marginRight: 8,
+    backgroundColor: '#f0f0f0',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginHorizontal: 4,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: '#eee',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-    elevation: 2,
+    minWidth: 70,
   },
-  dayChipSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+  dayChipSelected: { 
+    backgroundColor: '#007AFF' 
   },
-  dayChipDow: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#666',
+  dayChipDow: { 
+    fontSize: 12, 
+    color: '#555' 
   },
-  dayChipNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+  dayChipNumber: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    color: '#000' 
   },
-  calendarDotRow: {
-    flexDirection: 'row',
-    marginTop: 4,
+  calendarDotRow: { 
+    flexDirection: 'row', 
+    marginTop: 2 
   },
-  calendarDot: {
-    fontSize: 10,
-    marginHorizontal: 1,
+  calendarDot: { 
+    fontSize: 14, 
+    color: '#007AFF', 
+    marginRight: 2 
   },
 
-  // Colores de medicamentos (para el punto en el calendario)
-  paracetamol: { color: '#FF4500' }, // Rojo/Naranja
-  ibuprofeno: { color: '#00CED1' }, // Cian Oscuro
-  naproxeno: { color: '#8A2BE2' }, // Azul Violeta
-  tempra: { color: '#3CB371' }, // Verde Marino
-
-  // Lista de Medicamentos
-  todayHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
+  // Medicamentos
+  todayHeader: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginBottom: 10 
   },
-  todayBullet: {
-    fontSize: 20,
-    color: '#007AFF',
-    marginRight: 5,
+  todayBullet: { 
+    color: '#007AFF', 
+    fontSize: 16, 
+    marginRight: 8 
   },
-  todayTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+  todayTitle: { 
+    color: '#000', 
+    fontSize: 18, 
+    fontWeight: 'bold' 
   },
-  todaySubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 15,
-    marginLeft: 20,
+  todaySubtitle: { 
+    color: '#666', 
+    fontSize: 14, 
+    marginBottom: 15 
   },
-  medicationList: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+  medicationList: { 
+    backgroundColor: '#ffffff', 
+    borderRadius: 8, 
+    padding: 12 
   },
   medicationItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  }
-})
+    borderBottomColor: '#e0e0e0',
+  },
+  medicationName: { 
+    fontSize: 14, 
+    fontWeight: 'bold' 
+  },
+  medicationTime: { 
+    color: '#000', 
+    fontSize: 14 
+  },
+
+  // ===================== PRESCRIPTION SCREEN =====================
+  infoCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 18,
+    marginBottom: 18,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+  },
+  cardTitle: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  cardContent: { 
+    color: '#000', 
+    fontSize: 14, 
+    lineHeight: 20 
+  },
+  medicationItemPrescription: {
+    marginBottom: 15,
+    borderLeftWidth: 2,
+    borderLeftColor: '#e0e0e0',
+    paddingLeft: 12,
+  },
+  medicationDosage: { 
+    color: '#666', 
+    fontSize: 12, 
+    marginTop: 4, 
+    lineHeight: 16 
+  },
+
+  // ===================== PROFILE SCREEN =====================
+  profileHeader: { 
+    padding: 20, 
+    paddingTop: 60, 
+    backgroundColor: '#f8f9fa' 
+  },
+  headerButtons: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center' 
+  },
+  changePasswordButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#e3f2fd',
+    borderRadius: 8,
+  },
+  changePasswordText: { 
+    color: '#007AFF', 
+    fontSize: 14, 
+    fontWeight: 'bold', 
+    marginLeft: 8 
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#ffebee',
+    borderRadius: 8,
+  },
+  logoutText: { 
+    color: '#FF3B30', 
+    fontSize: 14, 
+    fontWeight: 'bold', 
+    marginLeft: 8 
+  },
+  profilePhotoContainer: { 
+    alignItems: 'center', 
+    marginBottom: 30, 
+    padding: 25 
+  },
+  profilePhoto: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  profileName: { 
+    color: '#000', 
+    fontSize: 22, 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    marginBottom: 8 
+  },
+  profileEmail: { 
+    color: '#666', 
+    fontSize: 16, 
+    textAlign: 'center' 
+  },
+  profileGrid: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    justifyContent: 'space-between' 
+  },
+  profileField: {
+    width: '48%',
+    marginBottom: 18,
+    paddingBottom: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  fieldLabel: { 
+    color: '#666', 
+    fontSize: 12, 
+    marginBottom: 6, 
+    fontWeight: '500' 
+  },
+  fieldValue: { 
+    color: '#000', 
+    fontSize: 16, 
+    fontWeight: '500' 
+  },
+  accessRow: { 
+    paddingVertical: 8 
+  },
+
+  // ===================== BOTTOM NAVIGATION =====================
+  bottomNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+  },
+  navItem: { 
+    padding: 5, 
+    alignItems: 'center', 
+    flex: 1 
+  },
+  navText: { 
+    color: '#666', 
+    fontSize: 10, 
+    textAlign: 'center', 
+    marginTop: 4 
+  },
+  activeNavText: { 
+    color: '#007AFF' 
+  },
+
+  // ===================== COLORS FOR MEDICATIONS =====================
+  paracetamol: { color: '#FF6B6B' },
+  ibuprofeno: { color: '#4ECDC4' },
+  naproxeno: { color: '#FFD166' },
+  tempra: { color: '#118AB2' },
+});

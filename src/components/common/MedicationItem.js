@@ -15,17 +15,14 @@ const getMedColorStyle = (nombre) => {
 export const MedicationItem = ({ med, accessibilitySettings, showTimes = true }) => (
   <View style={styles.medicationItem}>
     <Text style={[
-      styles.medicationName,
+      styles.medicationName, 
       getMedColorStyle(med.nombre),
-      accessibilitySettings.largeFont && { fontSize: 16 },
+      accessibilitySettings.largeFont && { fontSize: 16 }
     ]}>
       {med.nombre}
     </Text>
     {showTimes && (
-      <Text style={[
-        styles.medicationTime,
-        accessibilitySettings.largeFont && { fontSize: 16 },
-      ]}>
+      <Text style={[styles.medicationTime, accessibilitySettings.largeFont && { fontSize: 16 }]}>
         {med.horarios?.join(' · ')}
       </Text>
     )}
@@ -34,18 +31,11 @@ export const MedicationItem = ({ med, accessibilitySettings, showTimes = true })
 
 export const MedicationItemPrescription = ({ med, accessibilitySettings }) => (
   <View style={styles.medicationItemPrescription}>
-    <Text style={[
-      styles.medicationName,
-      getMedColorStyle(med.nombre_medicamento),
-      accessibilitySettings.largeFont && { fontSize: 16 },
-    ]}>
-      {med.nombre_medicamento}
+    <Text style={[styles.medicationName, accessibilitySettings.largeFont && { fontSize: 16 }]}>
+      {med.nombre}
     </Text>
-    <Text style={[
-      styles.medicationDosage,
-      accessibilitySettings.largeFont && { fontSize: 14 },
-    ]}>
-      {med.dosis} • cada {med.frecuencia} horas • {med.duracion}
+    <Text style={[styles.medicationDosage, accessibilitySettings.largeFont && { fontSize: 14 }]}>
+      {med.dosis} - {med.frecuencia} - Duración: {med.duracion} días
     </Text>
   </View>
 );
