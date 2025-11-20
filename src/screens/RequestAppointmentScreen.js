@@ -240,11 +240,6 @@ export const RequestAppointmentScreen = ({ navigation }) => {
                   (submitPressing || loading) && styles.navButtonActive,
                   { marginTop: 10 }
                 ]}
-                onPress={() => {
-                  setTimeout(() => {
-                    handleSubmitConsulta();
-                  }, 500);
-                }}
                 onPressIn={submitPressIn}
                 onPressOut={submitPressOut}
                 disabled={loading} 
