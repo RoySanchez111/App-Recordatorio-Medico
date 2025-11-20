@@ -9,6 +9,8 @@ import { RequestAppointmentScreen } from './src/screens/RequestAppointmentScreen
 import { PrescriptionScreen } from './src/screens/PrescriptionScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
 import { ChangePasswordScreen } from './src/screens/ChangePasswordScreen';
+import PrescriptionDetailScreen from './src/screens/PrescriptionDetailScreen';
+
 
 const Stack = createStackNavigator();
 
@@ -22,6 +24,7 @@ export default function App() {
           <Stack.Screen name="MainApp" component={MainAppScreen} options={{ headerShown: false }} />
           <Stack.Screen name="RequestAppointment" component={RequestAppointmentScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Prescription" component={PrescriptionScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="PrescriptionDetail" component={PrescriptionDetailScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
           <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ headerShown: false }} />
         </Stack.Navigator>

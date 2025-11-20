@@ -6,7 +6,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
     paddingTop: 25,
-    paddingBottom: 35,
     paddingHorizontal: 10,
   },
   contentFrame: { 
@@ -271,27 +270,35 @@ export const styles = StyleSheet.create({
 
   // Calendario
   fiveDayStrip: { 
-    marginTop: 10 
+  marginTop: 10,
+  alignSelf: 'center'
   },
   dayChip: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     borderRadius: 10,
     marginRight: 8,
     backgroundColor: '#f0f0f0',
     alignItems: 'center',
-    minWidth: 70,
+    minWidth: 80,
+    maxWidth: 80
   },
   dayChipSelected: { 
-    backgroundColor: '#007AFF' 
+      backgroundColor: '#C3E6FF',
+      borderWidth: 2,
+      borderColor: '#004C99',    // contraste más fuerte
+      shadowColor: '#000',
+      shadowOpacity: 0.08,
+      shadowRadius: 6,
+      shadowOffset: { width: 0, height: 2 },
   },
   dayChipDow: { 
-    fontSize: 12, 
+    fontSize: 16, 
     color: '#555' 
   },
   dayChipNumber: { 
-    fontSize: 18, 
-    fontWeight: 'bold', 
+    fontSize: 22, 
+    fontWeight: '700', 
     color: '#000' 
   },
   calendarDotRow: { 
@@ -299,9 +306,9 @@ export const styles = StyleSheet.create({
     marginTop: 2 
   },
   calendarDot: { 
-    fontSize: 14, 
+    fontSize: 25, 
     color: '#007AFF', 
-    marginRight: 2 
+    marginRight: 0 
   },
 
   // Medicamentos
@@ -474,22 +481,23 @@ export const styles = StyleSheet.create({
   bottomNavigation: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#ffffff',
     padding: 12,
   },
   navItem: { 
-    padding: 5, 
-    alignItems: 'center', 
+    paddingVertical: 10,   // antes 5
+    paddingHorizontal: 10,
+    alignItems: 'center',
     flex: 1 
   },
   navText: { 
     color: '#666', 
-    fontSize: 10, 
+    fontSize: 14, 
     textAlign: 'center', 
     marginTop: 4 
   },
   activeNavText: { 
-    color: '#007AFF' 
+    color: '#007AFF'
   },
 
   // ===================== COLORS FOR MEDICATIONS =====================
