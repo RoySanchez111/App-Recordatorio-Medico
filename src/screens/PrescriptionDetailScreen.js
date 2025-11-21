@@ -3,9 +3,11 @@ import { View, Text, ScrollView } from "react-native";
 import { ScreenTitle } from "../components/ScreenTitle";
 import { BottomNav } from "../components/BottomNav";
 import { styles } from "../styles/styles";
+import { MedicationItem } from "../components/common/MedicationItem"; 
 
 export default function PrescriptionDetailScreen({ route, navigation }) {
   const { receta, accessibilitySettings } = route.params;
+  const doctorDisplay = receta.doctorNombre || 'Información No Disponible'; 
 
   return (
     <View style={styles.screenContainer}>
@@ -17,8 +19,9 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
               Receta del {new Date(receta.fechaEmision).toLocaleDateString("es-MX")}
             </ScreenTitle>
 
-            <Text style={{textAlign:"center", marginBottom:20}}>
-              Dr. {receta.doctorNombre}
+            {/* MOSTRAR EL NOMBRE DEL DOCTOR DE FORMA CLARA */}
+            <Text style={{textAlign:"center", marginBottom:20, fontSize: 16}}>
+              Emitida por: Dr. <Text style={{fontWeight: "bold"}}>{doctorDisplay}</Text>
             </Text>
 
             {/* Diagnóstico */}
@@ -40,12 +43,13 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
               <Text style={styles.cardTitle}>Medicamentos</Text>
 
               {receta.medicamentos.map((m, i) => (
-                <View key={i} style={{marginBottom:12}}>
-                  <Text style={{fontWeight:"bold"}}>• {m.nombre_medicamento || m.nombre}</Text>
-                  <Text>Dosis: {m.dosis}</Text>
-                  <Text>Frecuencia: {m.frecuencia}</Text>
-                  <Text>Duración: {m.duracion}</Text>
-                </View>
+                <MedicationItem
+                  key={i}
+                  med={m}
+                  accessibilitySettings={accessibilitySettings}
+                    showDetails={true} // Forzar mostrar dosis y duración en la receta
+                    showTimes={true} // Forzar mostrar instrucciones/frecuencia
+                />
               ))}
             </View>
 

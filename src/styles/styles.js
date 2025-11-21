@@ -286,7 +286,7 @@ export const styles = StyleSheet.create({
   dayChipSelected: { 
       backgroundColor: '#C3E6FF',
       borderWidth: 2,
-      borderColor: '#004C99',    // contraste más fuerte
+      borderColor: '#004C99',
       shadowColor: '#000',
       shadowOpacity: 0.08,
       shadowRadius: 6,
@@ -337,13 +337,19 @@ export const styles = StyleSheet.create({
     borderRadius: 8, 
     padding: 12 
   },
+  medicationColorIndicator: {
+    width: 8,
+    height: '100%',
+    borderRadius: 4,
+    marginRight: 10,
+},
   medicationItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    padding: 15,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 10,
     alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   medicationName: { 
     fontSize: 14, 
@@ -499,10 +505,4 @@ export const styles = StyleSheet.create({
   activeNavText: { 
     color: '#007AFF'
   },
-
-  // ===================== COLORS FOR MEDICATIONS =====================
-  paracetamol: { color: '#FF6B6B' },
-  ibuprofeno: { color: '#4ECDC4' },
-  naproxeno: { color: '#FFD166' },
-  tempra: { color: '#118AB2' },
 });
