@@ -1,11 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  // Removed unused imports: TextInput, ScrollView, Alert
-  Alert,
-} from "react-native";
+import { View, Text, Pressable, Alert } from "react-native";
 import { useDualPress } from "../hooks/useDualPress";
 import { PrescriptionsContext } from "../contexts/AppContext";
 import { speakIfEnabled } from "../utils/speech";
@@ -16,7 +10,6 @@ const API_URL =
   "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
 
 export const AppointmentStatusScreen = ({ navigation }) => {
-  // ✅ FIX: The state is now correctly inside the functional component.
   const [consulta, setConsulta] = useState(null);
 
   const { accessibilitySettings, user } = useContext(PrescriptionsContext);
@@ -34,10 +27,9 @@ export const AppointmentStatusScreen = ({ navigation }) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            // ACTION confirmed as "getConsultasByPatient"
             action: "getConsultasByPatient",
             data: {
-              pacienteId: user.id, // Parameter confirmed as 'pacienteId'
+              pacienteId: user.id,
             },
           }),
         });
@@ -81,7 +73,7 @@ export const AppointmentStatusScreen = ({ navigation }) => {
             <View style={styles.card}>
               {/* 1. Fecha de la Cita */}
               <Text style={styles.text}>
-                {/* Bold Label */}
+                {}
                 <Text style={{ fontWeight: "bold" }}>Fecha de la Cita: </Text>
                 {/* Normal Value */}
                 {new Date(consulta.fecha).toLocaleDateString()}
@@ -89,7 +81,7 @@ export const AppointmentStatusScreen = ({ navigation }) => {
 
               {/* 2. Hora */}
               <Text style={styles.text}>
-                {/* Bold Label */}
+                {}
                 <Text style={{ fontWeight: "bold" }}>Hora: </Text>
                 {/* Normal Value */}
                 {consulta.hora}
@@ -97,7 +89,7 @@ export const AppointmentStatusScreen = ({ navigation }) => {
 
               {/* 3. Estado Actual */}
               <Text style={styles.text}>
-                {/* Bold Label */}
+                {}
                 <Text style={{ fontWeight: "bold" }}>Estado Actual: </Text>
                 {/* Normal Value */}
                 {consulta.status || "Pendiente"}
