@@ -356,7 +356,7 @@ export const RequestAppointmentScreen = ({ navigation }) => {
                     ? "Consultando..."
                     : statusPressing
                     ? "Confirmando..."
-                    : "Status de Mis Citas"}
+                    : "Estado de mi cita"}
                 </Text>
               </Pressable>
             </View>
