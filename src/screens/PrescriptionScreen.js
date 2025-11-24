@@ -15,8 +15,28 @@ export const PrescriptionScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // receta seleccionada para ver detalle
-  const [selectedReceta, setSelectedReceta] = useState(null);
+  // Calcular duración total del tratamiento basado en los medicamentos
+  const calcularDuracionTratamiento = (medicamentos) => {
+    if (!medicamentos || !Array.isArray(medicamentos) || medicamentos.length === 0) {
+      return "Duración no especificada";
+    }
+
+    // Buscar la duración más larga entre todos los medicamentos
+    let duracionMasLarga = "";
+    
+    medicamentos.forEach(med => {
+      if (med.duracion && med.duracion.length > 0) {
+        // Si encontramos una duración, la usamos
+        duracionMasLarga = med.duracion;
+      }
+    });
+
+    if (!duracionMasLarga) {
+      return "Duración no especificada";
+    }
+
+    return duracionMasLarga;
+  };
 
   useEffect(() => {
     if (!user || !user.id) {
@@ -57,11 +77,6 @@ export const PrescriptionScreen = ({ navigation }) => {
 
     fetchRecetas();
   }, [user]);
-
-  const card1 = useDualPress();
-  const card2 = useDualPress();
-  const card3 = useDualPress();
-  const card4 = useDualPress();
 
   // --- ESTADO: CARGANDO ---
   if (loading) {
@@ -133,98 +148,6 @@ export const PrescriptionScreen = ({ navigation }) => {
     );
   }
 
-  // ========= VISTA DE DETALLE =========
-  if (selectedReceta) {
-    const fecha = new Date(selectedReceta.fechaEmision).toLocaleDateString(
-      'es-MX'
-    );
-
-    const medicamentos = Array.isArray(selectedReceta.medicamentos)
-      ? selectedReceta.medicamentos
-      : [];
-
-    return (
-      <View style={styles.screenContainer}>
-        <View style={styles.contentFrame}>
-          <View style={styles.container}>
-            <ScrollView contentContainerStyle={styles.prescriptionScrollContent}>
-              <ScreenTitle accessibilitySettings={accessibilitySettings}>
-                {`Receta del ${fecha}`}
-              </ScreenTitle>
-
-              {/* “Minimizar” / volver a la lista */}
-              <Pressable
-                style={{ marginTop: 10, marginBottom: 10 }}
-                onPress={() => setSelectedReceta(null)}
-              >
-                <Text style={{ fontSize: 16, color: '#007AFF' }}>
-                  ← Volver a Mis Recetas
-                </Text>
-              </Pressable>
-
-              {/* Diagnóstico */}
-              <View style={[styles.infoCard, { marginTop: 20 }]}>
-                <Text style={[styles.cardTitle, { marginBottom: 8 }]}>
-                  Diagnóstico
-                </Text>
-                <Text style={styles.cardContent}>
-                  {selectedReceta.diagnostico || 'Sin diagnóstico registrado.'}
-                </Text>
-              </View>
-
-              {/* Medicamentos */}
-              <View
-                style={[
-                  styles.infoCard,
-                  { marginTop: 20, backgroundColor: '#f2f8ff' },
-                ]}
-              >
-                <Text style={[styles.cardTitle, { marginBottom: 8 }]}>
-                  Medicamentos
-                </Text>
-
-                {medicamentos.length === 0 && (
-                  <Text style={styles.cardContent}>
-                    No hay medicamentos registrados en esta receta.
-                  </Text>
-                )}
-
-                {medicamentos.map((med, idx) => (
-                  <View key={idx} style={{ marginBottom: 10 }}>
-                    <Text style={[styles.cardContent, { fontWeight: 'bold' }]}>
-                      • {med.nombre || 'Medicamento'}
-                    </Text>
-                    {med.dosis && (
-                      <Text style={styles.cardContent}>Dosis: {med.dosis}</Text>
-                    )}
-                    {med.frecuencia && (
-                      <Text style={styles.cardContent}>
-                        Frecuencia: {med.frecuencia}
-                      </Text>
-                    )}
-                    {med.duracion && (
-                      <Text style={styles.cardContent}>
-                        Duración: {med.duracion}
-                      </Text>
-                    )}
-                  </View>
-                ))}
-              </View>
-
-              <View style={styles.extraBottomPadding} />
-            </ScrollView>
-
-            <BottomNav
-              navigation={navigation}
-              accessibilitySettings={accessibilitySettings}
-              active="prescription"
-            />
-          </View>
-        </View>
-      </View>
-    );
-  }
-
   // ========= VISTA DE LISTA (MIS RECETAS) =========
   return (
     <View style={styles.screenContainer}>
@@ -235,32 +158,48 @@ export const PrescriptionScreen = ({ navigation }) => {
               Mis Recetas
             </ScreenTitle>
 
-            {recetas.map((receta, index) => (
-              <Pressable
-                key={index}
-                style={[styles.infoCard, { marginBottom: 20 }]}
-                onPress={() => setSelectedReceta(receta)} // ahora abre detalle en la misma pantalla
-              >
-                <Text style={[styles.cardTitle, { marginBottom: 5 }]}>
-                  Receta del{' '}
-                  {new Date(receta.fechaEmision).toLocaleDateString('es-MX')}
-                </Text>
-
-                <Text style={styles.cardContent}>
-                  Diagnóstico: {receta.diagnostico}
-                </Text>
-
-                <Text
-                  style={{
-                    marginTop: 8,
-                    fontSize: 16,
-                    color: '#555',
-                  }}
+            {recetas.map((receta, index) => {
+              const duracion = calcularDuracionTratamiento(receta.medicamentos);
+              const fechaFormateada = new Date(receta.fechaEmision).toLocaleDateString('es-MX');
+              
+              return (
+                <Pressable
+                  key={index}
+                  style={[styles.infoCard, { marginBottom: 20 }]}
+                  onPress={() => navigation.navigate('PrescriptionDetail', { 
+                    receta: receta,
+                    accessibilitySettings: accessibilitySettings 
+                  })}
                 >
-                  Toca para ver detalles →
-                </Text>
-              </Pressable>
-            ))}
+                  <Text style={[styles.cardTitle, { marginBottom: 5 }]}>
+                    Receta del {fechaFormateada}
+                  </Text>
+
+                  <Text style={[styles.cardContent, { marginBottom: 8 }]}>
+                    Diagnóstico: {receta.diagnostico || 'No especificado'}
+                  </Text>
+
+                  <Text style={[styles.cardContent, { fontWeight: '600', color: '#007AFF' }]}>
+                    Duración del tratamiento: {duracion}
+                  </Text>
+
+                  <Text style={[styles.cardContent, { marginTop: 8, fontSize: 14, color: '#666' }]}>
+                    {receta.medicamentos?.length || 0} medicamento(s) prescrito(s)
+                  </Text>
+
+                  <Text
+                    style={{
+                      marginTop: 12,
+                      fontSize: 14,
+                      color: '#007AFF',
+                      textAlign: 'right',
+                    }}
+                  >
+                    Toca para ver detalles completos →
+                  </Text>
+                </Pressable>
+              );
+            })}
 
             <View style={styles.extraBottomPadding} />
           </ScrollView>

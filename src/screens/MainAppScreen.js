@@ -8,7 +8,6 @@ import { MedicationItem } from '../components/common/MedicationItem';
 import { formatDate } from '../utils/dateUtils';
 import { styles } from '../styles/styles';
 
-// Tu URL de Lambda
 const API_URL = "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
 
 export const MainAppScreen = ({ navigation }) => {
@@ -17,17 +16,57 @@ export const MainAppScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
 
+  // Función para calcular horarios basados en frecuencia y primera ingesta
+  const calcularHorariosFrecuencia = (primeraIngesta, frecuencia) => {
+    if (!primeraIngesta || !frecuencia) return [];
+    
+    // Extraer número de horas de la frecuencia (ej: "cada 8 horas" -> 8)
+    const match = frecuencia.match(/\d+/);
+    if (!match) return [primeraIngesta];
+    
+    const frecuenciaHoras = parseInt(match[0]);
+    const horarios = [primeraIngesta];
+    const [hora, minuto] = primeraIngesta.split(':').map(Number);
+    
+    // Calcular las siguientes 3 tomas basadas en la frecuencia
+    for (let i = 1; i <= 3; i++) {
+      const nuevaHoraTotal = hora + (frecuenciaHoras * i);
+      const nuevaHora = nuevaHoraTotal % 24;
+      const nuevaHoraStr = nuevaHora.toString().padStart(2, '0');
+      const nuevoMinutoStr = minuto.toString().padStart(2, '0');
+      
+      horarios.push(`${nuevaHoraStr}:${nuevoMinutoStr}`);
+    }
+    
+    return horarios;
+  };
+
+  // Formatear hora para mostrar
+  const formatTime = (timeString) => {
+    if (!timeString || typeof timeString !== 'string') return '';
+    
+    const timeParts = timeString.split(':');
+    if (timeParts.length < 2) return timeString;
+    
+    const hours = parseInt(timeParts[0]);
+    const minutes = parseInt(timeParts[1]);
+    
+    if (isNaN(hours) || isNaN(minutes)) return timeString;
+    
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+  };
+
   // Obtener medicamentos REALES desde la API
   useEffect(() => {
     const fetchMedications = async () => {
-      // Si no hay usuario logueado o no tiene ID, no podemos buscar recetas
       if (!user || !user.id) {
         setLoading(false);
         return;
       }
 
       try {
-        // 1. Petición a la Lambda
         const response = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -43,8 +82,7 @@ export const MainAppScreen = ({ navigation }) => {
           throw new Error(recetas.message || 'Error al obtener recetas');
         }
 
-        // 2. Transformación de Datos
-        // La API devuelve Recetas -> Medicamentos. La App necesita una lista plana de Medicamentos.
+        // Transformación de Datos con información COMPLETA de la API
         const allMeds = [];
 
         if (Array.isArray(recetas)) {
@@ -52,56 +90,75 @@ export const MainAppScreen = ({ navigation }) => {
                 if (receta.medicamentos && Array.isArray(receta.medicamentos)) {
                     receta.medicamentos.forEach(med => {
                         
-                        // Calculamos fechas
-                        const fechaInicio = new Date(receta.fechaEmision); // Usamos fecha de emisión como inicio
+                        // Calculamos fechas basadas en la duración
+                        const fechaInicio = new Date(receta.fechaEmision);
                         
-                        // Intentamos parsear la duración (ej: "5 días" -> 5)
-                        let diasDuracion = 7; // Default 1 semana si falla
-                        const matchDuracion = med.duracion ? med.duracion.match(/\d+/) : null;
-                        if (matchDuracion) {
+                        // Parsear duración para calcular fecha fin
+                        let diasDuracion = 7; // Default 1 semana
+                        if (med.duracion) {
+                          const matchDuracion = med.duracion.match(/\d+/);
+                          if (matchDuracion) {
                             diasDuracion = parseInt(matchDuracion[0], 10);
+                          }
                         }
 
                         const fechaFin = new Date(fechaInicio);
                         fechaFin.setDate(fechaInicio.getDate() + diasDuracion);
 
-                        // Mapeamos al formato que usa tu App visualmente
+                        // Calcular horarios si hay frecuencia y primera ingesta
+                        let horariosMostrar = [];
+                        if (med.primeraIngesta && med.frecuencia) {
+                          horariosMostrar = calcularHorariosFrecuencia(med.primeraIngesta, med.frecuencia);
+                        } else if (med.frecuencia) {
+                          // Si solo hay frecuencia, mostrar la frecuencia como horario
+                          horariosMostrar = [med.frecuencia];
+                        } else if (med.primeraIngesta) {
+                          // Si solo hay primera ingesta, mostrar solo esa
+                          horariosMostrar = [med.primeraIngesta];
+                        }
+
+                        // Mapear al formato que usa la App con TODOS los campos REALES
                         allMeds.push({
-                            id: med.id, // ID único del detalle
+                            // Información básica
+                            id: med.id || `${receta.id}-${med.nombre_medicamento}`,
                             recetaId: receta.id,
+                            
+                            // Campos REALES de la API (los que realmente se guardan)
                             nombre: med.nombre_medicamento,
                             dosis: med.dosis,
+                            duracion: med.duracion,
+                            frecuencia: med.frecuencia,
+                            primeraIngesta: med.primeraIngesta,
                             instrucciones: med.instrucciones,
+                            cantidadInicial: med.cantidadInicial,
+                            
+                            // Campos calculados
                             inicio: fechaInicio,
                             fin: fechaFin,
-                            // Usamos la frecuencia como "horario" visual ya que no tenemos horas exactas en la BD
-                            horarios: [med.frecuencia], 
+                            horarios: horariosMostrar.length > 0 ? horariosMostrar : ['Horario no especificado'],
                             stock: med.cantidadInicial || 0,
                             dosisPorToma: 1,
-                            esLargoPlazo: diasDuracion > 30 // Lógica simple para determinar si es largo plazo
+                            esLargoPlazo: diasDuracion > 30
                         });
                     });
                 }
             });
         }
         
-        // 3. Guardar en el contexto
         setPrescriptions(allMeds);
 
       } catch (error) {
         console.error('Error fetching medications:', error);
-        // No mostramos alerta intrusiva al inicio, solo log, para no molestar al UX
       } finally {
         setLoading(false);
       }
     };
 
     fetchMedications();
-  }, [user]); // Se ejecuta cuando cambia el usuario
+  }, [user]);
 
   // Filtrar medicamentos para el día seleccionado
   const getMedsForDate = (date) => {
-    // Convertimos a string YYYY-MM-DD para comparar sin horas
     const targetDate = new Date(date).setHours(0,0,0,0);
     
     return prescriptions.filter((med) => {
@@ -117,7 +174,6 @@ export const MainAppScreen = ({ navigation }) => {
   // Lógica de stock bajo
   const getLowStockMeds = () =>
     prescriptions.filter((med) => {
-        // Si el stock es menor a 5 unidades, avisar
         return med.stock && med.stock < 5;
     });
 
@@ -187,12 +243,40 @@ export const MainAppScreen = ({ navigation }) => {
 
               <View style={styles.medicationList}>
                 {getMedsForDate(selectedDate).map((med) => (
-                  <MedicationItem 
-                    key={med.id} 
-                    med={med} 
-                    accessibilitySettings={accessibilitySettings}
-                    showTimes={true}
-                  />
+                  <View key={med.id} style={styles.medicationDetailCard}>
+                    <Text style={[styles.medicationName, { marginBottom: 5 }]}>
+                      {med.nombre}
+                    </Text>
+                    
+                    {/* Mostrar dosis - SIEMPRE mostrar aunque esté vacía */}
+                    <Text style={[styles.medicationTime, { marginBottom: 3 }]}>
+                      Dosis: {med.dosis || 'No especificada'}
+                    </Text>
+
+                    {/* Mostrar duración - USAR el campo duracion que sí funciona */}
+                    <Text style={[styles.medicationTime, { marginBottom: 3, color: '#007AFF' }]}>
+                      Duración: {med.duracion || 'No especificada'}
+                    </Text>
+
+                    {/* Mostrar horarios */}
+                    {med.horarios && med.horarios.length > 0 && (
+                      <Text style={[styles.medicationTime, { marginBottom: 3 }]}>
+                        Horarios: {med.horarios.map(hora => {
+                          if (hora.includes(':')) {
+                            return formatTime(hora);
+                          }
+                          return hora;
+                        }).join(', ')}
+                      </Text>
+                    )}
+
+                    {/* Mostrar instrucciones si existen */}
+                    {med.instrucciones && (
+                      <Text style={[styles.medicationTime, { fontStyle: 'italic', color: '#666' }]}>
+                        {med.instrucciones}
+                      </Text>
+                    )}
+                  </View>
                 ))}
 
                 {getMedsForDate(selectedDate).length === 0 && (

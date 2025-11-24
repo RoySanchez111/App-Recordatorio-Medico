@@ -491,7 +491,7 @@ export const styles = StyleSheet.create({
     padding: 12,
   },
   navItem: {
-    paddingVertical: 10, // antes 5
+    paddingVertical: 10,
     paddingHorizontal: 10,
     alignItems: "center",
     flex: 1,
@@ -505,6 +505,7 @@ export const styles = StyleSheet.create({
   activeNavText: {
     color: "#007AFF",
   },
+
   // ===================== COLORS FOR MEDICATIONS =====================
   paracetamol: { color: "#FF6B6B" },
   ibuprofeno: { color: "#4ECDC4" },
@@ -516,17 +517,133 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
-
   contentFrameStatus: {
     flex: 1,
     padding: 20,
   },
-
   containerStatus: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-
     width: "100%",
+  },
+
+  // ===================== MEDICATION DETAIL STYLES =====================
+  medicationDetailCard: {
+    backgroundColor: '#ffffff',
+    padding: 15,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+    flexWrap: 'wrap',
+  },
+  detailLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    width: '30%',
+  },
+  detailValue: {
+    fontSize: 14,
+    color: '#666',
+    width: '68%',
+    flex: 1,
+  },
+  horariosContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    width: '68%',
+    gap: 6,
+  },
+  horarioTag: {
+    backgroundColor: '#007AFF20',
+    color: '#0056b3',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  horarioCalculado: {
+    backgroundColor: '#28a74520',
+    color: '#155724',
+  },
+  // ===================== PRESCRIPTION DETAIL SCREEN =====================
+  doctorInfoContainer: {
+    backgroundColor: '#e3f2fd',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    alignItems: 'center'
+  },
+  doctorInfoText: {
+    fontSize: 16,
+    color: '#1565c0',
+    textAlign: 'center'
+  },
+  doctorName: {
+    fontWeight: 'bold',
+    color: '#0d47a1'
+  },
+  medicationInfoContainer: {
+    marginBottom: 15,
+  },
+  detailSection: {
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start'
+  },
+  horariosSection: {
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#ecf0f1'
+  },
+  horarioTagContainer: {
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginBottom: 5
+  },
+  horarioPrincipal: {
+    backgroundColor: '#1976d2'
+  },
+  horarioPrincipalText: {
+    color: '#ffffff'
+  },
+  instruccionesSection: {
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#ecf0f1'
+  },
+  instruccionesText: {
+    fontSize: 14,
+    lineHeight: 20
+  },
+  noMedicamentosContainer: {
+    padding: 20,
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8
+  },
+  noMedicamentosText: {
+    fontSize: 16,
+    color: '#6c757d',
+    textAlign: 'center'
   },
 });

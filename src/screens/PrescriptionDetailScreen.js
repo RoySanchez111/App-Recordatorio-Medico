@@ -3,11 +3,44 @@ import { View, Text, ScrollView } from "react-native";
 import { ScreenTitle } from "../components/ScreenTitle";
 import { BottomNav } from "../components/BottomNav";
 import { styles } from "../styles/styles";
-import { MedicationItem } from "../components/common/MedicationItem"; 
 
 export default function PrescriptionDetailScreen({ route, navigation }) {
   const { receta, accessibilitySettings } = route.params;
-  const doctorDisplay = receta.doctorNombre || 'Información No Disponible'; 
+  const doctorDisplay = receta.doctorNombre || 'Información No Disponible';
+
+  // Función para calcular horarios basados en frecuencia y primera ingesta
+  const calcularHorariosFrecuencia = (primeraIngesta, frecuencia) => {
+    if (!primeraIngesta || !frecuencia) return [];
+    
+    // Extraer número de horas de la frecuencia (ej: "cada 8 horas" -> 8)
+    const match = frecuencia.match(/\d+/);
+    if (!match) return [primeraIngesta];
+    
+    const frecuenciaHoras = parseInt(match[0]);
+    const horarios = [primeraIngesta];
+    const [hora, minuto] = primeraIngesta.split(':').map(Number);
+    
+    // Calcular las siguientes 3 tomas basadas en la frecuencia
+    for (let i = 1; i <= 3; i++) {
+      const nuevaHoraTotal = hora + (frecuenciaHoras * i);
+      const nuevaHora = nuevaHoraTotal % 24;
+      const nuevaHoraStr = nuevaHora.toString().padStart(2, '0');
+      const nuevoMinutoStr = minuto.toString().padStart(2, '0');
+      
+      horarios.push(`${nuevaHoraStr}:${nuevoMinutoStr}`);
+    }
+    
+    return horarios;
+  };
+
+  // Formatear hora para mostrar
+  const formatTime = (timeString) => {
+    if (!timeString) return 'No especificado';
+    const [hours, minutes] = timeString.split(':').map(Number);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+  };
 
   return (
     <View style={styles.screenContainer}>
@@ -19,41 +52,161 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
               Receta del {new Date(receta.fechaEmision).toLocaleDateString("es-MX")}
             </ScreenTitle>
 
-            {/* MOSTRAR EL NOMBRE DEL DOCTOR DE FORMA CLARA */}
-            <Text style={{textAlign:"center", marginBottom:20, fontSize: 16}}>
-              Emitida por: Dr. <Text style={{fontWeight: "bold"}}>{doctorDisplay}</Text>
-            </Text>
+            {/* Información del doctor */}
+            <View style={styles.doctorInfoContainer}>
+              <Text style={styles.doctorInfoText}>
+                Emitida por: <Text style={styles.doctorName}>Dr. {doctorDisplay}</Text>
+              </Text>
+            </View>
 
             {/* Diagnóstico */}
-            <View style={styles.infoCard}>
-              <Text style={styles.cardTitle}>Diagnóstico</Text>
-              <Text style={styles.cardContent}>{receta.diagnostico}</Text>
+            <View style={[styles.infoCard, { marginBottom: 20 }]}>
+              <Text style={styles.cardTitle}>Diagnóstico Principal</Text>
+              <Text style={styles.cardContent}>
+                {receta.diagnostico || 'No especificado'}
+              </Text>
             </View>
 
             {/* Observaciones */}
             {receta.observaciones && (
-              <View style={styles.infoCard}>
-                <Text style={styles.cardTitle}>Observaciones</Text>
+              <View style={[styles.infoCard, { marginBottom: 20 }]}>
+                <Text style={styles.cardTitle}>Observaciones Médicas</Text>
                 <Text style={styles.cardContent}>{receta.observaciones}</Text>
               </View>
             )}
 
-            {/* Medicamentos */}
-            <View style={[styles.infoCard, { backgroundColor:"#eef7ff" }]}>
-              <Text style={styles.cardTitle}>Medicamentos</Text>
+            {/* Medicamentos con detalles REALES de la API */}
+            <View style={[styles.infoCard, { backgroundColor: "#f8fbff", marginBottom: 20 }]}>
+              <Text style={[styles.cardTitle, { marginBottom: 15 }]}>Medicamentos Prescritos</Text>
 
-              {receta.medicamentos.map((m, i) => (
-                <MedicationItem
-                  key={i}
-                  med={m}
-                  accessibilitySettings={accessibilitySettings}
-                    showDetails={true} // Forzar mostrar dosis y duración en la receta
-                    showTimes={true} // Forzar mostrar instrucciones/frecuencia
-                />
-              ))}
+              {receta.medicamentos && receta.medicamentos.length > 0 ? (
+                receta.medicamentos.map((medicamento, index) => {
+                  // USAR CAMPOS REALES de la API (los que realmente se guardan)
+                  const duracion = medicamento.duracion;
+                  const frecuencia = medicamento.frecuencia;
+                  const primeraIngesta = medicamento.primeraIngesta;
+                  
+                  // Calcular horarios si hay frecuencia y primera ingesta
+                  let horariosMostrar = [];
+                  if (primeraIngesta && frecuencia) {
+                    horariosMostrar = calcularHorariosFrecuencia(primeraIngesta, frecuencia);
+                  } else if (frecuencia) {
+                    // Si solo hay frecuencia, mostrar la frecuencia como horario
+                    horariosMostrar = [frecuencia];
+                  } else if (primeraIngesta) {
+                    // Si solo hay primera ingesta, mostrar solo esa
+                    horariosMostrar = [primeraIngesta];
+                  }
+
+                  return (
+                    <View key={index} style={[styles.medicationDetailCard, { 
+                      marginBottom: 25,
+                      padding: 20,
+                      backgroundColor: '#ffffff',
+                      borderRadius: 12,
+                      borderLeftWidth: 4,
+                      borderLeftColor: '#007AFF'
+                    }]}>
+                      
+                      {/* Nombre del medicamento */}
+                      <Text style={[styles.medicationName, { 
+                        fontSize: 18, 
+                        marginBottom: 15,
+                        color: '#2c3e50',
+                        fontWeight: '600'
+                      }]}>
+                        {medicamento.nombre_medicamento || 'Medicamento no especificado'}
+                      </Text>
+
+                      {/* Información del medicamento en columnas */}
+                      <View style={styles.medicationInfoContainer}>
+                        
+                        {/* Dosis */}
+                        <View style={styles.detailSection}>
+                          <Text style={styles.detailLabel}>Dosis:</Text>
+                          <Text style={styles.detailValue}>
+                            {medicamento.dosis || 'No especificada'}
+                          </Text>
+                        </View>
+
+                        {/* Duración */}
+                        <View style={styles.detailSection}>
+                          <Text style={styles.detailLabel}>Duración:</Text>
+                          <Text style={styles.detailValue}>
+                            {duracion || 'No especificada'}
+                          </Text>
+                        </View>
+
+                        {/* Frecuencia */}
+                        {frecuencia && (
+                          <View style={styles.detailSection}>
+                            <Text style={styles.detailLabel}>Frecuencia:</Text>
+                            <Text style={styles.detailValue}>
+                              {frecuencia}
+                            </Text>
+                          </View>
+                        )}
+
+                        {/* Primera ingesta */}
+                        {primeraIngesta && (
+                          <View style={styles.detailSection}>
+                            <Text style={styles.detailLabel}>Primera toma:</Text>
+                            <Text style={styles.detailValue}>
+                              {formatTime(primeraIngesta)}
+                            </Text>
+                          </View>
+                        )}
+
+                      </View>
+
+                      {/* Horarios calculados COMPLETOS */}
+                      {horariosMostrar.length > 0 && (
+                        <View style={styles.horariosSection}>
+                          <Text style={[styles.detailLabel, { marginBottom: 10 }]}>Horarios de toma:</Text>
+                          <View style={styles.horariosContainer}>
+                            {horariosMostrar.map((hora, idx) => (
+                              <View key={idx} style={[
+                                styles.horarioTagContainer,
+                                primeraIngesta && hora === primeraIngesta ? styles.horarioPrincipal : {}
+                              ]}>
+                                <Text style={[
+                                  styles.horarioTag,
+                                  primeraIngesta && hora === primeraIngesta ? styles.horarioPrincipalText : {}
+                                ]}>
+                                  {hora.includes(':') ? formatTime(hora) : hora}
+                                </Text>
+                              </View>
+                            ))}
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Instrucciones adicionales */}
+                      {medicamento.instrucciones && (
+                        <View style={styles.instruccionesSection}>
+                          <Text style={[styles.detailLabel, { marginBottom: 8 }]}>Instrucciones:</Text>
+                          <Text style={[styles.instruccionesText, { 
+                            fontStyle: 'italic',
+                            color: '#555',
+                            lineHeight: 20
+                          }]}>
+                            {medicamento.instrucciones}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  );
+                })
+              ) : (
+                <View style={styles.noMedicamentosContainer}>
+                  <Text style={styles.noMedicamentosText}>
+                    No hay medicamentos registrados en esta receta.
+                  </Text>
+                </View>
+              )}
             </View>
 
-            <View style={{height:60}} />
+            <View style={{height: 40}} />
           </ScrollView>
 
           <BottomNav 
