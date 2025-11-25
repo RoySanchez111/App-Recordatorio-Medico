@@ -497,4 +497,196 @@ export const styles = StyleSheet.create({
   ibuprofeno: { color: '#4ECDC4' },
   naproxeno: { color: '#FFD166' },
   tempra: { color: '#118AB2' },
+
+  // HEADER MEJORADO
+homeHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  width: '100%',
+  paddingHorizontal: 20,
+  marginBottom: 10,
+},
+
+timeContainer: {
+  alignItems: 'flex-start',
+},
+
+currentTime: {
+  fontSize: 28,
+  fontWeight: 'bold',
+  color: '#2d3748',
+},
+
+currentDate: {
+  fontSize: 14,
+  color: '#718096',
+  marginTop: 4,
+},
+
+// BOTÓN DE NOTIFICACIONES
+notificationButton: {
+  width: 50,
+  height: 50,
+  borderRadius: 25,
+  backgroundColor: '#ffffff',
+  justifyContent: 'center',
+  alignItems: 'center',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+  borderWidth: 1,
+  borderColor: '#e2e8f0',
+},
+
+bellIcon: {
+  fontSize: 20,
+},
+
+notificationBadge: {
+  position: 'absolute',
+  top: -5,
+  right: -5,
+  backgroundColor: '#e53e3e',
+  borderRadius: 10,
+  minWidth: 20,
+  height: 20,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+badgeText: {
+  color: 'white',
+  fontSize: 12,
+  fontWeight: 'bold',
+},
+
+// TEXTO DE BIENVENIDA
+welcomeText: {
+  fontSize: 14,
+  color: '#718096',
+  textAlign: 'center',
+  marginBottom: 30,
+  fontStyle: 'italic',
+},
+
+// MODAL DE NOTIFICACIONES
+modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  justifyContent: 'flex-end',
+},
+
+notificationsModal: {
+  backgroundColor: 'white',
+  borderTopLeftRadius: 20,
+  borderTopRightRadius: 20,
+  maxHeight: '80%',
+  minHeight: '40%',
+},
+
+modalHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: 20,
+  borderBottomWidth: 1,
+  borderBottomColor: '#e2e8f0',
+},
+
+modalTitle: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  color: '#2d3748',
+},
+
+closeButton: {
+  width: 30,
+  height: 30,
+  borderRadius: 15,
+  backgroundColor: '#f7fafc',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+closeIcon: {
+  fontSize: 16,
+  color: '#4a5568',
+  fontWeight: 'bold',
+},
+
+modalContent: {
+  padding: 20,
+},
+
+medicationModalItem: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#f7fafc',
+  padding: 15,
+  borderRadius: 12,
+  marginBottom: 10,
+},
+
+medicationIcon: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: '#ebf8ff',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginRight: 15,
+},
+
+pillIcon: {
+  fontSize: 18,
+},
+
+medicationDetails: {
+  flex: 1,
+},
+
+medicationModalName: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: '#2d3748',
+  marginBottom: 4,
+},
+
+medicationModalTime: {
+  fontSize: 14,
+  color: '#718096',
+  marginBottom: 2,
+},
+
+medicationModalInstructions: {
+  fontSize: 13,
+  color: '#a0aec0',
+  fontStyle: 'italic',
+},
+
+emptyModal: {
+  alignItems: 'center',
+  padding: 40,
+},
+
+emptyModalIcon: {
+  fontSize: 40,
+  marginBottom: 15,
+},
+
+emptyModalText: {
+  fontSize: 16,
+  color: '#718096',
+  textAlign: 'center',
+  marginBottom: 8,
+},
+
+emptyModalSubtext: {
+  fontSize: 14,
+  color: '#a0aec0',
+  textAlign: 'center',
+},
 });
