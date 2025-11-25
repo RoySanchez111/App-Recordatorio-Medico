@@ -6,7 +6,6 @@ import { styles } from "../styles/styles";
 
 export default function PrescriptionDetailScreen({ route, navigation }) {
   const { receta, accessibilitySettings } = route.params;
-  const doctorDisplay = receta.doctorNombre || "Información No Disponible";
 
   // Función para calcular horarios basados en frecuencia y primera ingesta
   const calcularHorariosFrecuencia = (primeraIngesta, frecuencia) => {
