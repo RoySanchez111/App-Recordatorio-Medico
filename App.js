@@ -11,6 +11,8 @@ import { RequestAppointmentScreen } from './src/screens/RequestAppointmentScreen
 import { PrescriptionScreen } from './src/screens/PrescriptionScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
 import { ChangePasswordScreen } from './src/screens/ChangePasswordScreen';
+import PrescriptionDetailScreen from "./src/screens/PrescriptionDetailScreen";
+import { AppointmentStatusScreen } from "./src/screens/AppointmentStatusScreen";
 
 // Ignorar el warning de expo-notifications en Expo Go
 LogBox.ignoreLogs([
@@ -137,6 +139,11 @@ export default function App() {
             component={PrescriptionScreen} 
             options={{ headerShown: false }} 
           />
+          <Stack.Screen
+            name="PrescriptionDetail"
+            component={PrescriptionDetailScreen}
+            options={{ headerShown: false }}
+          />
           <Stack.Screen 
             name="Profile" 
             component={ProfileScreen} 
@@ -146,6 +153,11 @@ export default function App() {
             name="ChangePassword" 
             component={ChangePasswordScreen} 
             options={{ headerShown: false }} 
+          />
+          <Stack.Screen
+            name="AppointmentStatusScreen"
+            component={AppointmentStatusScreen}
+            options={{ headerShown: false }}
           />
         </Stack.Navigator>
       </NavigationContainer>

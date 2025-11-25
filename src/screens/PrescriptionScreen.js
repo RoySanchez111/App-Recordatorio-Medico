@@ -1,15 +1,19 @@
 import React, { useState, useContext, useEffect } from 'react';
+<<<<<<< HEAD
 import { View, Text, Pressable, ScrollView, Alert, TextInput, TouchableOpacity } from 'react-native';
+=======
+import { View, Text, Pressable, ScrollView } from 'react-native';
+>>>>>>> 95f0f2be418f6437fae584e2fbc708221b9001df
 import { PrescriptionsContext } from '../contexts/AppContext';
 import { useDualPress } from '../hooks/useDualPress';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { BottomNav } from '../components/BottomNav';
 import { styles } from '../styles/styles';
 
-// Tu URL de Lambda
 const API_URL = "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
 
 export const PrescriptionScreen = ({ navigation }) => {
+<<<<<<< HEAD
   const { 
     accessibilitySettings, 
     user, 
@@ -18,6 +22,10 @@ export const PrescriptionScreen = ({ navigation }) => {
     removePrescription 
   } = useContext(PrescriptionsContext); 
   
+=======
+  const { accessibilitySettings, user } = useContext(PrescriptionsContext);
+
+>>>>>>> 95f0f2be418f6437fae584e2fbc708221b9001df
   const [recetas, setRecetas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,48 +38,67 @@ export const PrescriptionScreen = ({ navigation }) => {
     minute: ''
   });
 
-  // Cargar Recetas
+  // Calcular duración total del tratamiento basado en los medicamentos
+  const calcularDuracionTratamiento = (medicamentos) => {
+    if (!medicamentos || !Array.isArray(medicamentos) || medicamentos.length === 0) {
+      return "Duración no especificada";
+    }
+
+    // Buscar la duración más larga entre todos los medicamentos
+    let duracionMasLarga = "";
+    
+    medicamentos.forEach(med => {
+      if (med.duracion && med.duracion.length > 0) {
+        // Si encontramos una duración, la usamos
+        duracionMasLarga = med.duracion;
+      }
+    });
+
+    if (!duracionMasLarga) {
+      return "Duración no especificada";
+    }
+
+    return duracionMasLarga;
+  };
+
   useEffect(() => {
     if (!user || !user.id) {
-        setLoading(false);
-        return;
+      setLoading(false);
+      return;
     }
-    
+
     const fetchRecetas = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'getRecipesByPatient',
-                    data: { pacienteId: user.id }
-                })
-            });
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'getRecipesByPatient',
+            data: { pacienteId: user.id },
+          }),
+        });
 
-            const data = await response.json();
+        const data = await response.json();
 
-            if (response.ok) {
-                // Ordenar por fecha (la más reciente primero)
-                const recetasOrdenadas = data.sort((a, b) => 
-                    new Date(b.fechaEmision) - new Date(a.fechaEmision)
-                );
-                setRecetas(recetasOrdenadas);
-            } else {
-                throw new Error(data.message || "No se pudieron cargar las recetas");
-            }
-        } catch (err) {
-            console.error("Error fetching recipes:", err);
-            setError("No se pudo conectar con el servidor.");
-        } finally {
-            setLoading(false);
+        if (response.ok) {
+          const recetasOrdenadas = data.sort(
+            (a, b) => new Date(b.fechaEmision) - new Date(a.fechaEmision)
+          );
+          setRecetas(recetasOrdenadas);
+        } else {
+          throw new Error(data.message || 'No se pudieron cargar las recetas');
         }
+      } catch (err) {
+        console.error('Error fetching recipes:', err);
+        setError('No se pudo conectar con el servidor.');
+      } finally {
+        setLoading(false);
+      }
     };
-    
-    fetchRecetas();
-  }, [user]); 
 
+<<<<<<< HEAD
   // Hooks de accesibilidad para las tarjetas
   const card1 = useDualPress();
   const card2 = useDualPress();
@@ -141,29 +168,96 @@ export const PrescriptionScreen = ({ navigation }) => {
   const formatTime = (hour, minute) => {
     return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
   };
+=======
+    fetchRecetas();
+  }, [user]);
+>>>>>>> 95f0f2be418f6437fae584e2fbc708221b9001df
 
   // --- ESTADO: CARGANDO ---
   if (loading) {
-      return (
-          <View style={styles.screenContainer}>
-              <View style={styles.contentFrame}>
-                  <View style={styles.container}>
-                      <ScreenTitle accessibilitySettings={accessibilitySettings}>Mis Recetas</ScreenTitle>
-                      <Text style={{textAlign: 'center', padding: 20, fontSize: 18}}>Cargando historial médico...</Text>
-                      <BottomNav navigation={navigation} accessibilitySettings={accessibilitySettings} active="prescription" />
-                  </View>
-              </View>
+    return (
+      <View style={styles.screenContainer}>
+        <View style={styles.contentFrame}>
+          <View style={styles.container}>
+            <ScreenTitle accessibilitySettings={accessibilitySettings}>
+              Mis Recetas
+            </ScreenTitle>
+            <Text style={{ textAlign: 'center', padding: 20, fontSize: 18 }}>
+              Cargando historial médico...
+            </Text>
+            <BottomNav
+              navigation={navigation}
+              accessibilitySettings={accessibilitySettings}
+              active="prescription"
+            />
           </View>
-      );
+        </View>
+      </View>
+    );
   }
+<<<<<<< HEAD
   
+=======
+
+  // --- ESTADO: ERROR O VACÍO ---
+  if (error || recetas.length === 0) {
+    return (
+      <View style={styles.screenContainer}>
+        <View style={styles.contentFrame}>
+          <View style={styles.container}>
+            <ScrollView contentContainerStyle={styles.prescriptionScrollContent}>
+              <View style={styles.invisiblePadding} />
+              <View style={styles.prescriptionContainer}>
+                <ScreenTitle accessibilitySettings={accessibilitySettings}>
+                  Receta
+                </ScreenTitle>
+                <View
+                  style={{
+                    backgroundColor: '#fff',
+                    padding: 20,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    marginTop: 20,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      color: '#666',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {error
+                      ? error
+                      : 'Aún no tienes recetas registradas por tu doctor.'}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.extraBottomPadding} />
+            </ScrollView>
+            <BottomNav
+              navigation={navigation}
+              accessibilitySettings={accessibilitySettings}
+              active="prescription"
+            />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  // ========= VISTA DE LISTA (MIS RECETAS) =========
+>>>>>>> 95f0f2be418f6437fae584e2fbc708221b9001df
   return (
     <View style={styles.screenContainer}>
       <View style={styles.contentFrame}>
         <View style={styles.container}>
           <ScrollView contentContainerStyle={styles.prescriptionScrollContent}>
-            <View style={styles.invisiblePadding} />
+            <ScreenTitle accessibilitySettings={accessibilitySettings}>
+              Mis Recetas
+            </ScreenTitle>
 
+<<<<<<< HEAD
             {/* SECCIÓN: AGREGAR MEDICAMENTO MANUAL */}
             <View style={styles.prescriptionContainer}>
               <ScreenTitle accessibilitySettings={accessibilitySettings}>
@@ -311,6 +405,50 @@ export const PrescriptionScreen = ({ navigation }) => {
                 </View>
               )}
             </View>
+=======
+            {recetas.map((receta, index) => {
+              const duracion = calcularDuracionTratamiento(receta.medicamentos);
+              const fechaFormateada = new Date(receta.fechaEmision).toLocaleDateString('es-MX');
+              
+              return (
+                <Pressable
+                  key={index}
+                  style={[styles.infoCard, { marginBottom: 20 }]}
+                  onPress={() => navigation.navigate('PrescriptionDetail', { 
+                    receta: receta,
+                    accessibilitySettings: accessibilitySettings 
+                  })}
+                >
+                  <Text style={[styles.cardTitle, { marginBottom: 5 }]}>
+                    Receta del {fechaFormateada}
+                  </Text>
+
+                  <Text style={[styles.cardContent, { marginBottom: 8 }]}>
+                    Diagnóstico: {receta.diagnostico || 'No especificado'}
+                  </Text>
+
+                  <Text style={[styles.cardContent, { fontWeight: '600', color: '#007AFF' }]}>
+                    Duración del tratamiento: {duracion}
+                  </Text>
+
+                  <Text style={[styles.cardContent, { marginTop: 8, fontSize: 14, color: '#666' }]}>
+                    {receta.medicamentos?.length || 0} medicamento(s) prescrito(s)
+                  </Text>
+
+                  <Text
+                    style={{
+                      marginTop: 12,
+                      fontSize: 14,
+                      color: '#007AFF',
+                      textAlign: 'right',
+                    }}
+                  >
+                    Toca para ver detalles completos →
+                  </Text>
+                </Pressable>
+              );
+            })}
+>>>>>>> 95f0f2be418f6437fae584e2fbc708221b9001df
 
             {/* SECCIÓN: RECETAS MÉDICAS (CÓDIGO ORIGINAL) */}
             {recetas.length > 0 && (
@@ -424,7 +562,11 @@ export const PrescriptionScreen = ({ navigation }) => {
             <View style={styles.extraBottomPadding} />
           </ScrollView>
 
-          <BottomNav navigation={navigation} accessibilitySettings={accessibilitySettings} active="prescription" />
+          <BottomNav
+            navigation={navigation}
+            accessibilitySettings={accessibilitySettings}
+            active="prescription"
+          />
         </View>
       </View>
     </View>
