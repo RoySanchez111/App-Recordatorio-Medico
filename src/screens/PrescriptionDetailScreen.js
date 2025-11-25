@@ -53,14 +53,6 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
               {new Date(receta.fechaEmision).toLocaleDateString("es-MX")}
             </ScreenTitle>
 
-            {/* Información del doctor */}
-            <View style={styles.doctorInfoContainer}>
-              <Text style={styles.doctorInfoText}>
-                Emitida por:{" "}
-                <Text style={styles.doctorName}>Dr. {doctorDisplay}</Text>
-              </Text>
-            </View>
-
             {/* Diagnóstico */}
             <View style={[styles.infoCard, { marginBottom: 20 }]}>
               <Text style={styles.cardTitle}>Diagnóstico Principal</Text>
