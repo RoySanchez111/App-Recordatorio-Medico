@@ -248,117 +248,67 @@ export const styles = StyleSheet.create({
     backgroundColor: "#004499",
   },
 
-  // ===================== MAIN APP SCREEN =====================
-  alertBox: {
-    backgroundColor: "#FFF4E5",
-    borderRadius: 8,
-    padding: 12,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#FFC107",
-  },
-  alertTitle: {
-    fontWeight: "bold",
-    marginBottom: 4,
-    color: "#E65100",
-  },
-  alertText: {
-    fontSize: 13,
-    color: "#5D4037",
-  },
-
-  // Calendario
-  fiveDayStrip: {
-    marginTop: 10,
-    alignSelf: "center",
-  },
-  dayChip: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    marginRight: 8,
-    backgroundColor: "#f0f0f0",
-    alignItems: "center",
-    minWidth: 80,
-    maxWidth: 80,
-  },
-  dayChipSelected: {
-    backgroundColor: "#C3E6FF",
-    borderWidth: 2,
-    borderColor: "#004C99",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  dayChipDow: {
-    fontSize: 16,
-    color: "#555",
-  },
-  dayChipNumber: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#000",
-  },
-  calendarDotRow: {
-    flexDirection: "row",
-    marginTop: 2,
-  },
-  calendarDot: {
-    fontSize: 25,
-    color: "#007AFF",
-    marginRight: 0,
-  },
-
-  // Medicamentos
-  todayHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  todayBullet: {
-    color: "#007AFF",
-    fontSize: 16,
-    marginRight: 8,
-  },
-  todayTitle: {
-    color: "#000",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  todaySubtitle: {
-    color: "#666",
-    fontSize: 14,
-    marginBottom: 15,
-  },
-  medicationList: {
-    backgroundColor: "#ffffff",
-    borderRadius: 8,
-    padding: 12,
-  },
-  medicationColorIndicator: {
-    width: 8,
-    height: "100%",
-    borderRadius: 4,
-    marginRight: 10,
-  },
-  medicationItem: {
-    flexDirection: "row",
-    padding: 15,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    marginBottom: 10,
-    alignItems: "center",
-  },
-  medicationName: {
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  medicationTime: {
-    color: "#000",
-    fontSize: 14,
-  },
+  // ===================== MAIN APP SCREEN MEJORADO =====================
+medicationDetailCardEnhanced: {
+  backgroundColor: '#ffffff',
+  padding: 20,
+  borderRadius: 12,
+  borderLeftWidth: 4,
+  borderLeftColor: '#007AFF',
+  marginBottom: 16,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
+detailRowEnhanced: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+  marginBottom: 12,
+  flexWrap: 'wrap',
+},
+detailLabelEnhanced: {
+  fontSize: 14,
+  fontWeight: '600',
+  color: '#2c3e50',
+  width: '35%',
+},
+detailValueEnhanced: {
+  fontSize: 14,
+  color: '#34495e',
+  width: '62%',
+  flex: 1,
+  lineHeight: 20,
+},
+horariosContainerEnhanced: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  width: '62%',
+  gap: 8,
+  marginTop: 4,
+},
+horarioTagEnhanced: {
+  backgroundColor: '#e3f2fd',
+  color: '#1565c0',
+  paddingHorizontal: 10,
+  paddingVertical: 6,
+  borderRadius: 16,
+  fontSize: 12,
+  fontWeight: '500',
+  marginBottom: 4,
+},
+horarioPrincipalEnhanced: {
+  backgroundColor: '#1976d2',
+  color: '#ffffff',
+},
+instruccionesSection: {
+  marginTop: 16,
+  paddingTop: 16,
+  borderTopWidth: 1,
+  borderTopColor: '#ecf0f1'
+},
 
   // ===================== PRESCRIPTION SCREEN =====================
   infoCard: {
@@ -403,6 +353,10 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+   medicationName: {
+    fontSize: 14,
+    fontWeight: "bold",
   },
   changePasswordButton: {
     flexDirection: "row",

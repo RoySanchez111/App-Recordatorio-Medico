@@ -1,26 +1,22 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { PrescriptionsContext } from '../contexts/AppContext';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { BottomNav } from '../components/BottomNav';
 import { CalendarStrip } from '../components/common/CalendarStrip';
-import { MedicationItem } from '../components/common/MedicationItem';
-import { formatDate } from '../utils/dateUtils';
 import { styles } from '../styles/styles';
 
 const API_URL = "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
 
 export const MainAppScreen = ({ navigation }) => {
-  const { prescriptions, setPrescriptions, accessibilitySettings, user } = useContext(PrescriptionsContext);
+  const { prescriptions, setPrescriptions, accessibilitySettings, user, getMedicationColor } = useContext(PrescriptionsContext);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
 
-  // Función para calcular horarios basados en frecuencia y primera ingesta
   const calcularHorariosFrecuencia = (primeraIngesta, frecuencia) => {
     if (!primeraIngesta || !frecuencia) return [];
     
-    // Extraer número de horas de la frecuencia (ej: "cada 8 horas" -> 8)
     const match = frecuencia.match(/\d+/);
     if (!match) return [primeraIngesta];
     
@@ -28,7 +24,6 @@ export const MainAppScreen = ({ navigation }) => {
     const horarios = [primeraIngesta];
     const [hora, minuto] = primeraIngesta.split(':').map(Number);
     
-    // Calcular las siguientes 3 tomas basadas en la frecuencia
     for (let i = 1; i <= 3; i++) {
       const nuevaHoraTotal = hora + (frecuenciaHoras * i);
       const nuevaHora = nuevaHoraTotal % 24;
@@ -41,7 +36,6 @@ export const MainAppScreen = ({ navigation }) => {
     return horarios;
   };
 
-  // Formatear hora para mostrar
   const formatTime = (timeString) => {
     if (!timeString || typeof timeString !== 'string') return '';
     
@@ -58,7 +52,6 @@ export const MainAppScreen = ({ navigation }) => {
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
   };
 
-  // Obtener medicamentos REALES desde la API
   useEffect(() => {
     const fetchMedications = async () => {
       if (!user || !user.id) {
@@ -82,48 +75,45 @@ export const MainAppScreen = ({ navigation }) => {
           throw new Error(recetas.message || 'Error al obtener recetas');
         }
 
-        // Transformación de Datos con información COMPLETA de la API
         const allMeds = [];
 
         if (Array.isArray(recetas)) {
             recetas.forEach(receta => {
                 if (receta.medicamentos && Array.isArray(receta.medicamentos)) {
                     receta.medicamentos.forEach(med => {
-                        
-                        // Calculamos fechas basadas en la duración
                         const fechaInicio = new Date(receta.fechaEmision);
                         
-                        // Parsear duración para calcular fecha fin
-                        let diasDuracion = 7; // Default 1 semana
+                        let fechaFin = new Date(fechaInicio);
+                        
                         if (med.duracion) {
                           const matchDuracion = med.duracion.match(/\d+/);
                           if (matchDuracion) {
-                            diasDuracion = parseInt(matchDuracion[0], 10);
+                            const duracionNum = parseInt(matchDuracion[0], 10);
+                            
+                            if (med.duracion.includes('mes') || med.duracion.includes('month')) {
+                              fechaFin.setMonth(fechaInicio.getMonth() + duracionNum);
+                            } else if (med.duracion.includes('semana') || med.duracion.includes('week')) {
+                              fechaFin.setDate(fechaInicio.getDate() + (duracionNum * 7));
+                            } else {
+                              fechaFin.setDate(fechaInicio.getDate() + duracionNum);
+                            }
                           }
+                        } else {
+                          fechaFin.setDate(fechaInicio.getDate() + 7);
                         }
 
-                        const fechaFin = new Date(fechaInicio);
-                        fechaFin.setDate(fechaInicio.getDate() + diasDuracion);
-
-                        // Calcular horarios si hay frecuencia y primera ingesta
                         let horariosMostrar = [];
                         if (med.primeraIngesta && med.frecuencia) {
                           horariosMostrar = calcularHorariosFrecuencia(med.primeraIngesta, med.frecuencia);
                         } else if (med.frecuencia) {
-                          // Si solo hay frecuencia, mostrar la frecuencia como horario
                           horariosMostrar = [med.frecuencia];
                         } else if (med.primeraIngesta) {
-                          // Si solo hay primera ingesta, mostrar solo esa
                           horariosMostrar = [med.primeraIngesta];
                         }
 
-                        // Mapear al formato que usa la App con TODOS los campos REALES
                         allMeds.push({
-                            // Información básica
                             id: med.id || `${receta.id}-${med.nombre_medicamento}`,
                             recetaId: receta.id,
-                            
-                            // Campos REALES de la API (los que realmente se guardan)
                             nombre: med.nombre_medicamento,
                             dosis: med.dosis,
                             duracion: med.duracion,
@@ -131,14 +121,12 @@ export const MainAppScreen = ({ navigation }) => {
                             primeraIngesta: med.primeraIngesta,
                             instrucciones: med.instrucciones,
                             cantidadInicial: med.cantidadInicial,
-                            
-                            // Campos calculados
                             inicio: fechaInicio,
                             fin: fechaFin,
                             horarios: horariosMostrar.length > 0 ? horariosMostrar : ['Horario no especificado'],
                             stock: med.cantidadInicial || 0,
                             dosisPorToma: 1,
-                            esLargoPlazo: diasDuracion > 30
+                            esLargoPlazo: med.duracion && (med.duracion.includes('mes') || med.duracion.includes('month'))
                         });
                     });
                 }
@@ -157,7 +145,6 @@ export const MainAppScreen = ({ navigation }) => {
     fetchMedications();
   }, [user]);
 
-  // Filtrar medicamentos para el día seleccionado
   const getMedsForDate = (date) => {
     const targetDate = new Date(date).setHours(0,0,0,0);
     
@@ -165,13 +152,12 @@ export const MainAppScreen = ({ navigation }) => {
       if (!med.inicio || !med.fin) return false;
       
       const inicio = new Date(med.inicio).setHours(0,0,0,0);
-      const fin = new Date(med.fin).setHours(0,0,0,0);
+      const fin = new Date(med.fin).setHours(23,59,59,999);
       
       return targetDate >= inicio && targetDate <= fin;
     });
   };
 
-  // Lógica de stock bajo
   const getLowStockMeds = () =>
     prescriptions.filter((med) => {
         return med.stock && med.stock < 5;
@@ -243,38 +229,69 @@ export const MainAppScreen = ({ navigation }) => {
 
               <View style={styles.medicationList}>
                 {getMedsForDate(selectedDate).map((med) => (
-                  <View key={med.id} style={styles.medicationDetailCard}>
-                    <Text style={[styles.medicationName, { marginBottom: 5 }]}>
+                  <View key={med.id} style={styles.medicationDetailCardEnhanced}>
+                    <Text style={[styles.medicationName, { 
+                      marginBottom: 16,
+                      color: getMedicationColor(med.nombre)
+                    }]}>
                       {med.nombre}
                     </Text>
                     
-                    {/* Mostrar dosis - SIEMPRE mostrar aunque esté vacía */}
-                    <Text style={[styles.medicationTime, { marginBottom: 3 }]}>
-                      Dosis: {med.dosis || 'No especificada'}
-                    </Text>
-
-                    {/* Mostrar duración - USAR el campo duracion que sí funciona */}
-                    <Text style={[styles.medicationTime, { marginBottom: 3, color: '#007AFF' }]}>
-                      Duración: {med.duracion || 'No especificada'}
-                    </Text>
-
-                    {/* Mostrar horarios */}
-                    {med.horarios && med.horarios.length > 0 && (
-                      <Text style={[styles.medicationTime, { marginBottom: 3 }]}>
-                        Horarios: {med.horarios.map(hora => {
-                          if (hora.includes(':')) {
-                            return formatTime(hora);
-                          }
-                          return hora;
-                        }).join(', ')}
+                    <View style={styles.detailRowEnhanced}>
+                      <Text style={styles.detailLabelEnhanced}>Dosis:</Text>
+                      <Text style={styles.detailValueEnhanced}>
+                        {med.dosis || 'No especificada'}
                       </Text>
+                    </View>
+
+                    <View style={styles.detailRowEnhanced}>
+                      <Text style={styles.detailLabelEnhanced}>Duración:</Text>
+                      <Text style={styles.detailValueEnhanced}>
+                        {med.duracion || 'No especificada'}
+                      </Text>
+                    </View>
+
+                    {med.frecuencia && (
+                      <View style={styles.detailRowEnhanced}>
+                        <Text style={styles.detailLabelEnhanced}>Frecuencia:</Text>
+                        <Text style={styles.detailValueEnhanced}>
+                          {med.frecuencia}
+                        </Text>
+                      </View>
                     )}
 
-                    {/* Mostrar instrucciones si existen */}
+                    {med.primeraIngesta && (
+                      <View style={styles.detailRowEnhanced}>
+                        <Text style={styles.detailLabelEnhanced}>Primera toma:</Text>
+                        <Text style={styles.detailValueEnhanced}>
+                          {formatTime(med.primeraIngesta)}
+                        </Text>
+                      </View>
+                    )}
+
+                    {med.horarios && med.horarios.length > 0 && (
+                      <View style={styles.detailRowEnhanced}>
+                        <Text style={styles.detailLabelEnhanced}>Horarios:</Text>
+                        <View style={styles.horariosContainerEnhanced}>
+                          {med.horarios.map((hora, idx) => (
+                            <Text key={idx} style={[
+                              styles.horarioTagEnhanced,
+                              med.primeraIngesta && hora === med.primeraIngesta ? styles.horarioPrincipalEnhanced : {}
+                            ]}>
+                              {hora.includes(':') ? formatTime(hora) : hora}
+                            </Text>
+                          ))}
+                        </View>
+                      </View>
+                    )}
+
                     {med.instrucciones && (
-                      <Text style={[styles.medicationTime, { fontStyle: 'italic', color: '#666' }]}>
-                        {med.instrucciones}
-                      </Text>
+                      <View style={styles.instruccionesSection}>
+                        <Text style={[styles.detailLabelEnhanced, { marginBottom: 8 }]}>Instrucciones:</Text>
+                        <Text style={[styles.detailValueEnhanced, { fontStyle: 'italic', color: '#555' }]}>
+                          {med.instrucciones}
+                        </Text>
+                      </View>
                     )}
                   </View>
                 ))}
