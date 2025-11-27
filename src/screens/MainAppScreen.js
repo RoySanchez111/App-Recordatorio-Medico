@@ -1,4 +1,5 @@
-import React, { useState, useContext, useCallback, useRef } from 'react'; // Agregamos useRef
+import React, { useState, useContext } from 'react'; // Agregamos useRef
+import Reactt, {useCallback, useRef} from 'react'; //Agregamos callback
 import { View, Text, ScrollView, Alert, ActivityIndicator } from 'react-native'; 
 import { useFocusEffect } from '@react-navigation/native'; 
 import { PrescriptionsContext } from '../contexts/AppContext';
