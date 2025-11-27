@@ -1,11 +1,10 @@
 import React, { createContext, useState, useEffect } from 'react';
-<<<<<<< HEAD
 import * as Notifications from 'expo-notifications';
-=======
 import { apiRequest } from '../utils/api'; 
->>>>>>> 95f0f2be418f6437fae584e2fbc708221b9001df
 
 export const PrescriptionsContext = createContext();
+
+// Paleta de colores para los medicamentos (De la versión Incoming)
 const VIBRANT_COLOR_PALETTE = [
     '#FF8C00', // 1. Naranja Brillante
     '#1E90FF', // 2. Azul Dodger Brillante
@@ -18,21 +17,30 @@ const VIBRANT_COLOR_PALETTE = [
 ];
 
 export const AppProvider = ({ children }) => {
-<<<<<<< HEAD
+  // --- ESTADOS ---
+  const [user, setUser] = useState(null);
   const [prescriptions, setPrescriptions] = useState([]);
   const [accessibilitySettings, setAccessibilitySettings] = useState({
     largeFont: false,
     ttsEnabled: false,
   });
-  const [user, setUser] = useState(null);
+  
+  // Estados para Notificaciones (De HEAD)
   const [scheduledNotifications, setScheduledNotifications] = useState([]);
+  
+  // Estados para API y UI (De Incoming)
+  const [medicationColorsMap, setMedicationColorsMap] = useState({}); 
+  const [isLoading, setIsLoading] = useState(true);
+
+  // ============================================================
+  // 1. LÓGICA DE NOTIFICACIONES (De HEAD)
+  // ============================================================
 
   // Cargar notificaciones al iniciar
   useEffect(() => {
     loadScheduledNotifications();
   }, []);
 
-  // Cargar notificaciones existentes
   const loadScheduledNotifications = async () => {
     try {
       const scheduled = await Notifications.getAllScheduledNotificationsAsync();
@@ -42,13 +50,12 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // ✅ FUNCIÓN MEJORADA - Programar notificación con estilo personalizado
   const scheduleMedicationNotification = async (medication) => {
     try {
       const notificationBody = `
 💊 Centro de notificaciones
 
-Ya solo tu ${medication.name} ${medication.dose || ''}
+Ya es hora de tu ${medication.name} ${medication.dose || ''}
 Toma 1 cápsula con agua ${medication.instructions ? medication.instructions.toLowerCase() : 'según indicaciones'}
 
 (100%✓)
@@ -82,7 +89,7 @@ Toma 1 cápsula con agua ${medication.instructions ? medication.instructions.toL
         }
       ]);
 
-      console.log('✅ Notificación programada:', medication.name, 'a las', `${medication.hour}:${medication.minute}`);
+      console.log('✅ Notificación programada:', medication.name);
       return notificationId;
     } catch (error) {
       console.error('❌ Error scheduling notification:', error);
@@ -90,7 +97,6 @@ Toma 1 cápsula con agua ${medication.instructions ? medication.instructions.toL
     }
   };
 
-  // ✅ FUNCIÓN ORIGINAL MANTENIDA - Cancelar notificación específica
   const cancelMedicationNotification = async (notificationId) => {
     try {
       await Notifications.cancelScheduledNotificationAsync(notificationId);
@@ -102,7 +108,6 @@ Toma 1 cápsula con agua ${medication.instructions ? medication.instructions.toL
     }
   };
 
-  // ✅ FUNCIÓN ORIGINAL MANTENIDA - Cancelar todas las notificaciones de un medicamento
   const cancelAllMedicationNotifications = async (medicationId) => {
     try {
       const notificationsToCancel = scheduledNotifications.filter(
@@ -121,7 +126,6 @@ Toma 1 cápsula con agua ${medication.instructions ? medication.instructions.toL
     }
   };
 
-  // ✅ FUNCIÓN ORIGINAL MANTENIDA - Agregar prescripción con notificación
   const addPrescriptionWithNotification = async (prescription) => {
     try {
       const newPrescription = {
@@ -146,7 +150,6 @@ Toma 1 cápsula con agua ${medication.instructions ? medication.instructions.toL
     }
   };
 
-  // ✅ FUNCIÓN ORIGINAL MANTENIDA - Eliminar prescripción
   const removePrescription = async (prescriptionId) => {
     try {
       const prescription = prescriptions.find(p => p.id === prescriptionId);
@@ -161,7 +164,6 @@ Toma 1 cápsula con agua ${medication.instructions ? medication.instructions.toL
     }
   };
 
-  // ✅ FUNCIÓN ORIGINAL MANTENIDA - Cancelar todas las notificaciones
   const cancelAllNotifications = async () => {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
@@ -171,28 +173,83 @@ Toma 1 cápsula con agua ${medication.instructions ? medication.instructions.toL
     }
   };
 
-  // ✅ FUNCIÓN ORIGINAL MANTENIDA - Obtener notificaciones de medicamento
   const getNotificationsForMedication = (medicationId) => {
     return scheduledNotifications.filter(
       notif => notif.medicationId === medicationId
     );
   };
 
+  // ============================================================
+  // 2. LÓGICA DE API Y COLORES (De Incoming)
+  // ============================================================
+
+  const generateColorMap = (recetas) => {
+      const colorMap = {};
+      let colorIndex = 0;
+      
+      recetas.forEach(receta => {
+          (receta.medicamentos || []).forEach(med => {
+              const medName = med.nombre_medicamento; 
+              if (medName && !colorMap[medName]) {
+                  const color = VIBRANT_COLOR_PALETTE[colorIndex % VIBRANT_COLOR_PALETTE.length];
+                  colorMap[medName] = color;
+                  colorIndex++; 
+              }
+          });
+      });
+      setMedicationColorsMap(colorMap);
+  };
+  
+  // Carga automática desde API cuando cambia el usuario
+  useEffect(() => {
+      const loadData = async () => {
+          if (!user || !user.id) {
+              setIsLoading(false);
+              return; 
+          }
+          
+          setIsLoading(true);
+          try {
+              const fetchedRecetas = await apiRequest('getRecipesByPatient', {
+                  pacienteId: user.id 
+              }); 
+              
+              // Nota: Aquí combinamos los datos de la API. 
+              // Si quieres mantener las prescripciones manuales (locales), deberías concatenarlas.
+              // Por ahora, priorizamos la API como fuente de verdad.
+              setPrescriptions(fetchedRecetas); 
+              generateColorMap(fetchedRecetas);
+              
+          } catch (error) {
+              console.error("Error al cargar recetas o asignar colores:", error);
+              // No borramos prescriptions si falla, para mantener datos previos si los hubiera
+          } finally {
+              setIsLoading(false);
+          }
+      };
+
+      loadData();
+  }, [user]);
+
+  const getMedicationColor = (name) => {
+      return medicationColorsMap[name] || '#CCCCCC'; 
+  };
+
   return (
     <PrescriptionsContext.Provider
       value={{
-        // ✅ ESTADO ORIGINAL MANTENIDO
+        // Datos y Configuración
+        user,
+        setUser,
         prescriptions,
         setPrescriptions,
         accessibilitySettings,
         setAccessibilitySettings,
-        user,
-        setUser,
+        isLoading,
+        medicationColorsMap,
         
-        // ✅ NUEVO estado (no rompe compatibilidad)
+        // Funciones de Notificaciones
         scheduledNotifications,
-        
-        // ✅ TODAS las funciones originales MANTENIDAS
         addPrescriptionWithNotification,
         removePrescription,
         scheduleMedicationNotification,
@@ -200,105 +257,13 @@ Toma 1 cápsula con agua ${medication.instructions ? medication.instructions.toL
         cancelAllMedicationNotifications,
         cancelAllNotifications,
         getNotificationsForMedication,
-        
-        // ✅ Nueva función adicional (no afecta lo existente)
-        loadScheduledNotifications
+        loadScheduledNotifications,
+
+        // Funciones de UI
+        getMedicationColor
       }}
     >
       {children}
     </PrescriptionsContext.Provider>
   );
-=======
-    // --- ESTADOS ---
-    const [prescriptions, setPrescriptions] = useState([]);
-    const [accessibilitySettings, setAccessibilitySettings] = useState({
-        largeFont: false,
-        ttsEnabled: false,
-    });
-    const [user, setUser] = useState(null);
-    const [medicationColorsMap, setMedicationColorsMap] = useState({}); 
-    const [isLoading, setIsLoading] = useState(true); // Estado de carga para evitar renderizado vacío
-
-    // --- FUNCIÓN DE ASIGNACIÓN CÍCLICA DE COLOR (Front-end) ---
-    // Esta función asigna un color único y cíclico a cada nombre de medicamento.
-    const generateColorMap = (recetas) => {
-        const colorMap = {};
-        let colorIndex = 0;
-        
-        recetas.forEach(receta => {
-            // Aseguramos que solo procesamos si hay medicamentos
-            (receta.medicamentos || []).forEach(med => {
-                // Tu Lambda usa 'nombre_medicamento'
-                const medName = med.nombre_medicamento; 
-
-                if (medName && !colorMap[medName]) {
-                    const color = VIBRANT_COLOR_PALETTE[colorIndex % VIBRANT_COLOR_PALETTE.length];
-                    colorMap[medName] = color;
-                    colorIndex++; 
-                }
-            });
-        });
-        setMedicationColorsMap(colorMap);
-    };
-    
-    // --- Lógica para cargar las recetas y asignar los colores ---
-    useEffect(() => {
-        const loadData = async () => {
-            // Utilizamos el estado isLoading para gestionar si el usuario aún no se ha cargado.
-            if (!user || !user.id) {
-                setIsLoading(false);
-                return; 
-            }
-            
-            setIsLoading(true);
-            try {
-                // 1. Llamada usando la acción 'getRecipesByPatient' de tu Lambda
-                const fetchedRecetas = await apiRequest('getRecipesByPatient', {
-                    pacienteId: user.id 
-                }); 
-                
-                // 2. Actualizar estados
-                setPrescriptions(fetchedRecetas); 
-                generateColorMap(fetchedRecetas);
-                
-            } catch (error) {
-                console.error("Error al cargar recetas o asignar colores:", error);
-                // Si la carga falla, asegurémonos de que al menos prescriptions no esté en un estado roto.
-                setPrescriptions([]); 
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadData();
-    }, [user]); // Se ejecuta cuando el 'user' cambia (ej: después del login)
-
-    // Helper para obtener el color
-    const getMedicationColor = (name) => {
-        return medicationColorsMap[name] || '#CCCCCC'; 
-    };
-
-    // Devolvemos 'null' o un componente de carga si la aplicación está inicializando
-    // antes de que el usuario haya sido autenticado o cargado.
-    if (isLoading && !user) {
-        return null; 
-    }
-
-    return (
-        <PrescriptionsContext.Provider
-            value={{
-                prescriptions,
-                setPrescriptions,
-                accessibilitySettings,
-                setAccessibilitySettings,
-                user,
-                setUser,
-                isLoading, // Útil para que los componentes muestren un spinner
-                getMedicationColor // Función clave
-            }}
-        >
-            {children}
-        </PrescriptionsContext.Provider>
-    );
->>>>>>> 95f0f2be418f6437fae584e2fbc708221b9001df
 };
