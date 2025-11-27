@@ -168,11 +168,7 @@ export const LoginScreen = ({ navigation }) => {
 
         // Pequeño delay para asegurar que el Contexto se propague antes de cambiar de pantalla
         setTimeout(() => {
-          Alert.alert(
-            "Ingreso exitoso",
-            `Bienvenido(a) ${loginData.user.nombreCompleto}`,
-            [{ text: "OK", onPress: () => navigation.navigate("MainApp") }]
-          );
+          navigation.navigate("MainApp");
         }, 100);
       } else {
         throw new Error(
