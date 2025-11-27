@@ -6,7 +6,7 @@ import { useDualPress } from '../hooks/useDualPress';
 import { styles } from '../styles/styles';
 
 // Logo - usa la ruta correcta
-const heartbeatLogo = require('../../assets/heartbeat_logo.png');
+const heartbeatLogo = require('../../assets/heartbeat.png');
 
 export const HomeScreen = ({ navigation }) => {
   const emergencyNumber = '911';
