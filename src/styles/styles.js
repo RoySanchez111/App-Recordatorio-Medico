@@ -217,14 +217,14 @@ export const styles = StyleSheet.create({
 
   // ===================== BOTONES =====================
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#6a8dff",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
     marginTop: 20,
   },
   buttonPressed: {
-    backgroundColor: "#0056CC",
+    backgroundColor: "#5a7ddf",
     transform: [{ scale: 0.95 }],
   },
   buttonText: {
@@ -233,7 +233,7 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   navButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#6a8dff",
     padding: 20,
     borderRadius: 10,
     alignItems: "center",
@@ -241,11 +241,11 @@ export const styles = StyleSheet.create({
     maxWidth: 300,
   },
   navButtonPressed: {
-    backgroundColor: "#0056CC",
+    backgroundColor: "#5a7ddf",
     transform: [{ scale: 0.95 }],
   },
   navButtonActive: {
-    backgroundColor: "#004499",
+    backgroundColor: "#4a6dcf",
   },
 
   // ===================== MAIN APP SCREEN MEJORADO =====================
@@ -254,7 +254,11 @@ export const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 12,
     borderLeftWidth: 4,
+<<<<<<< HEAD
     borderLeftColor: '#007AFF',
+=======
+    borderLeftColor: '#6a8dff',
+>>>>>>> 1c61584d976e407df22d7af64241c83caeb849df
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -300,7 +304,11 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
   },
   horarioPrincipalEnhanced: {
+<<<<<<< HEAD
     backgroundColor: '#1976d2',
+=======
+    backgroundColor: '#6a8dff',
+>>>>>>> 1c61584d976e407df22d7af64241c83caeb849df
     color: '#ffffff',
   },
   instruccionesSection: {
@@ -317,10 +325,10 @@ export const styles = StyleSheet.create({
     padding: 18,
     marginBottom: 18,
     borderLeftWidth: 4,
-    borderLeftColor: "#007AFF",
+    borderLeftColor: "#6a8dff",
   },
   cardTitle: {
-    color: "#007AFF",
+    color: "#6a8dff",
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 8,
@@ -366,7 +374,7 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
   },
   changePasswordText: {
-    color: "#007AFF",
+    color: "#6a8dff",
     fontSize: 14,
     fontWeight: "bold",
     marginLeft: 8,
@@ -393,7 +401,7 @@ export const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: "#007AFF",
+    backgroundColor: "#6a8dff",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
@@ -457,10 +465,11 @@ export const styles = StyleSheet.create({
     marginTop: 4,
   },
   activeNavText: {
-    color: "#007AFF",
+    color: "#6a8dff",
   },
 
   // ===================== COLORS FOR MEDICATIONS =====================
+<<<<<<< HEAD
   paracetamol: { color: '#FF6B6B' },
   ibuprofeno: { color: '#4ECDC4' },
   naproxeno: { color: '#FFD166' },
@@ -657,6 +666,12 @@ export const styles = StyleSheet.create({
     color: '#a0aec0',
     textAlign: 'center',
   },
+=======
+  paracetamol: { color: "#FF6B6B" },
+  ibuprofeno: { color: "#4ECDC4" },
+  naproxeno: { color: "#FFD166" },
+  tempra: { color: "#118AB2" },
+>>>>>>> 1c61584d976e407df22d7af64241c83caeb849df
 
   // ===================== STATUS SCREEN =====================
   screenContainerStatus: {
@@ -680,7 +695,7 @@ export const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     borderLeftWidth: 4,
-    borderLeftColor: '#007AFF',
+    borderLeftColor: '#6a8dff',
     marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -714,8 +729,8 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   horarioTag: {
-    backgroundColor: '#007AFF20',
-    color: '#0056b3',
+    backgroundColor: '#6a8dff20',
+    color: '#5a7ddf',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -767,7 +782,7 @@ export const styles = StyleSheet.create({
     marginBottom: 5
   },
   horarioPrincipal: {
-    backgroundColor: '#1976d2'
+    backgroundColor: '#6a8dff'
   },
   horarioPrincipalText: {
     color: '#ffffff'
@@ -793,7 +808,10 @@ export const styles = StyleSheet.create({
     color: '#6c757d',
     textAlign: 'center'
   },
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1c61584d976e407df22d7af64241c83caeb849df
   // ===================== CALENDAR STYLES MEJORADOS =====================
   calendarWrapper: {
     alignItems: 'center',
@@ -834,16 +852,26 @@ export const styles = StyleSheet.create({
     elevation: 1,
   },
   dayChipSelected: {
+<<<<<<< HEAD
     backgroundColor: '#007AFF',
     borderColor: '#0056CC',
     shadowColor: '#007AFF',
+=======
+    backgroundColor: '#6a8dff',
+    borderColor: '#5a7ddf',
+    shadowColor: '#6a8dff',
+>>>>>>> 1c61584d976e407df22d7af64241c83caeb849df
     shadowOpacity: 0.3,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
     elevation: 6,
   },
   dayChipToday: {
+<<<<<<< HEAD
     borderColor: '#007AFF',
+=======
+    borderColor: '#6a8dff',
+>>>>>>> 1c61584d976e407df22d7af64241c83caeb849df
     backgroundColor: '#E3F2FD',
   },
   dayChipDow: {
@@ -863,7 +891,11 @@ export const styles = StyleSheet.create({
     color: '#ffffff',
   },
   dayChipTodayText: {
+<<<<<<< HEAD
     color: '#007AFF',
+=======
+    color: '#6a8dff',
+>>>>>>> 1c61584d976e407df22d7af64241c83caeb849df
   },
   calendarDotRow: {
     flexDirection: 'row',
@@ -883,6 +915,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 2,
   },
+<<<<<<< HEAD
 
   // ===================== PATIENT SECTION STYLES =====================
   patientSection: {
@@ -958,3 +991,6 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
   }
 });
+=======
+});
+>>>>>>> 1c61584d976e407df22d7af64241c83caeb849df
