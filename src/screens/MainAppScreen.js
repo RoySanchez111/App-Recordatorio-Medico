@@ -184,8 +184,8 @@ export const MainAppScreen = ({ navigation }) => {
   // Solo se muestra si REALMENTE no tenemos datos en memoria.
   if (loading && prescriptions.length === 0) {
     return (
-      <View style={styles.screenContainer}>
-        <View style={styles.contentFrame}>
+      <View style={[styles.screenContainer, { justifyContent: 'center', alignItems: 'center' }]}>
+        <View style={[styles.contentFrame, { justifyContent: 'center', alignItems: 'center' }]}>
           <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
             <ActivityIndicator size="large" color="#007AFF" />
             <Text style={{textAlign: 'center', padding: 20, fontSize: 16, color: '#666'}}>
@@ -199,14 +199,22 @@ export const MainAppScreen = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.screenContainer}>
-      <View style={styles.contentFrame}>
-        <View style={styles.container}>
-          <ScrollView style={styles.scrollContent}>
+    <View style={[styles.screenContainer, { justifyContent: 'flex-start' }]}>
+      <View style={[styles.contentFrame, { justifyContent: 'flex-start' }]}>
+        <View style={[styles.container, { justifyContent: 'flex-start' }]}>
+          <ScrollView 
+            style={styles.scrollContent}
+            contentContainerStyle={{ 
+              flexGrow: 1,
+              alignItems: 'center',
+              paddingHorizontal: 10
+            }}
+            showsVerticalScrollIndicator={false}
+          >
             <View style={styles.invisiblePadding} />
 
             {lowStock.length > 0 && (
-              <View style={styles.alertBox}>
+              <View style={[styles.alertBox, { width: '95%', alignSelf: 'center' }]}>
                 <Text style={[styles.alertTitle, accessibilitySettings.largeFont && { fontSize: 16 }]}>
                   Atención
                 </Text>
@@ -218,12 +226,12 @@ export const MainAppScreen = ({ navigation }) => {
               </View>
             )}
 
-            <View style={styles.section}>
+            <View style={[styles.section, { width: '100%', alignItems: 'center' }]}>
               <ScreenTitle accessibilitySettings={accessibilitySettings}>
                 Calendario Health Reminder
               </ScreenTitle>
 
-              <View style={styles.calendarWrapper}>
+              <View style={[styles.calendarWrapper, { width: '100%', alignSelf: 'center' }]}>
                 <CalendarStrip
                   currentDate={currentDate}
                   selectedDate={selectedDate}
@@ -237,35 +245,35 @@ export const MainAppScreen = ({ navigation }) => {
               </View>
             </View>
 
-            <View style={styles.section}>
-              <View style={styles.todayHeader}>
+            <View style={[styles.section, { width: '95%', alignSelf: 'center', alignItems: 'center' }]}>
+              <View style={[styles.todayHeader, { width: '100%', justifyContent: 'center', alignItems: 'center' }]}>
                 <Text style={styles.todayBullet}>●</Text>
-                <Text style={[styles.todayTitle, accessibilitySettings.largeFont && styles.sectionTitleLarge]}>
+                <Text style={[styles.todayTitle, accessibilitySettings.largeFont && styles.sectionTitleLarge, { textAlign: 'center' }]}>
                   Medicamentos para {selectedDate.toLocaleDateString()}
                 </Text>
               </View>
 
-              <Text style={[styles.todaySubtitle, accessibilitySettings.largeFont && { fontSize: 16 }]}>
+              <Text style={[styles.todaySubtitle, accessibilitySettings.largeFont && { fontSize: 16 }, { textAlign: 'center', marginTop: 5 }]}>
                 {user?.nombreCompleto ? `Paciente: ${user.nombreCompleto}` : 'Tus recordatorios'}
               </Text>
 
-              <View style={styles.medicationList}>
+              <View style={[styles.medicationList, { width: '100%', alignItems: 'center' }]}>
                 {getMedsForDate(selectedDate).map((med) => (
-                  <View key={med.id} style={styles.medicationDetailCard}>
-                    <Text style={[styles.medicationName, { marginBottom: 5 }]}>
+                  <View key={med.id} style={[styles.medicationDetailCard, { width: '100%' }]}>
+                    <Text style={[styles.medicationName, { marginBottom: 5, textAlign: 'center' }]}>
                       {med.nombre}
                     </Text>
                     
-                    <Text style={[styles.medicationTime, { marginBottom: 3 }]}>
+                    <Text style={[styles.medicationTime, { marginBottom: 3, textAlign: 'center' }]}>
                       Dosis: {med.dosis || 'No especificada'}
                     </Text>
 
-                    <Text style={[styles.medicationTime, { marginBottom: 3, color: '#007AFF' }]}>
+                    <Text style={[styles.medicationTime, { marginBottom: 3, color: '#007AFF', textAlign: 'center' }]}>
                       Duración: {med.duracion || 'No especificada'}
                     </Text>
 
                     {med.horarios && med.horarios.length > 0 && (
-                      <Text style={[styles.medicationTime, { marginBottom: 3 }]}>
+                      <Text style={[styles.medicationTime, { marginBottom: 3, textAlign: 'center' }]}>
                         Horarios: {med.horarios.map(hora => {
                           if (hora.includes(':')) {
                             return formatTime(hora);
@@ -276,7 +284,7 @@ export const MainAppScreen = ({ navigation }) => {
                     )}
 
                     {med.instrucciones && (
-                      <Text style={[styles.medicationTime, { fontStyle: 'italic', color: '#666' }]}>
+                      <Text style={[styles.medicationTime, { fontStyle: 'italic', color: '#666', textAlign: 'center' }]}>
                         {med.instrucciones}
                       </Text>
                     )}
@@ -284,8 +292,8 @@ export const MainAppScreen = ({ navigation }) => {
                 ))}
 
                 {getMedsForDate(selectedDate).length === 0 && (
-                  <View style={{padding: 20, alignItems: 'center'}}>
-                    <Text style={[styles.emptyText, accessibilitySettings.largeFont && { fontSize: 16 }]}>
+                  <View style={{padding: 20, alignItems: 'center', width: '100%'}}>
+                    <Text style={[styles.emptyText, accessibilitySettings.largeFont && { fontSize: 16 }, { textAlign: 'center' }]}>
                       No hay medicamentos programados para este día.
                     </Text>
                   </View>
