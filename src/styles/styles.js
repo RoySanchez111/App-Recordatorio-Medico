@@ -60,13 +60,13 @@ export const styles = StyleSheet.create({
   profileContainer: {
     maxWidth: 400,
     alignSelf: "center",
-    width: "100%",
+    width: "%100",
     padding: 10,
   },
   passwordContainer: {
     maxWidth: 400,
     alignSelf: "center",
-    width: "100%",
+    width: "%100",
     padding: 10,
   },
 
@@ -249,66 +249,66 @@ export const styles = StyleSheet.create({
   },
 
   // ===================== MAIN APP SCREEN MEJORADO =====================
-medicationDetailCardEnhanced: {
-  backgroundColor: '#ffffff',
-  padding: 20,
-  borderRadius: 12,
-  borderLeftWidth: 4,
-  borderLeftColor: '#007AFF',
-  marginBottom: 16,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-  elevation: 3,
-},
-detailRowEnhanced: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
-  marginBottom: 12,
-  flexWrap: 'wrap',
-},
-detailLabelEnhanced: {
-  fontSize: 14,
-  fontWeight: '600',
-  color: '#2c3e50',
-  width: '35%',
-},
-detailValueEnhanced: {
-  fontSize: 14,
-  color: '#34495e',
-  width: '62%',
-  flex: 1,
-  lineHeight: 20,
-},
-horariosContainerEnhanced: {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  width: '62%',
-  gap: 8,
-  marginTop: 4,
-},
-horarioTagEnhanced: {
-  backgroundColor: '#e3f2fd',
-  color: '#1565c0',
-  paddingHorizontal: 10,
-  paddingVertical: 6,
-  borderRadius: 16,
-  fontSize: 12,
-  fontWeight: '500',
-  marginBottom: 4,
-},
-horarioPrincipalEnhanced: {
-  backgroundColor: '#1976d2',
-  color: '#ffffff',
-},
-instruccionesSection: {
-  marginTop: 16,
-  paddingTop: 16,
-  borderTopWidth: 1,
-  borderTopColor: '#ecf0f1'
-},
+  medicationDetailCardEnhanced: {
+    backgroundColor: '#ffffff',
+    padding: 20,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  detailRowEnhanced: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+    flexWrap: 'wrap',
+  },
+  detailLabelEnhanced: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2c3e50',
+    width: '35%',
+  },
+  detailValueEnhanced: {
+    fontSize: 14,
+    color: '#34495e',
+    width: '62%',
+    flex: 1,
+    lineHeight: 20,
+  },
+  horariosContainerEnhanced: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    width: '62%',
+    gap: 8,
+    marginTop: 4,
+  },
+  horarioTagEnhanced: {
+    backgroundColor: '#e3f2fd',
+    color: '#1565c0',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    fontSize: 12,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  horarioPrincipalEnhanced: {
+    backgroundColor: '#1976d2',
+    color: '#ffffff',
+  },
+  instruccionesSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#ecf0f1'
+  },
 
   // ===================== PRESCRIPTION SCREEN =====================
   infoCard: {
@@ -354,7 +354,7 @@ instruccionesSection: {
     justifyContent: "space-between",
     alignItems: "center",
   },
-   medicationName: {
+  medicationName: {
     fontSize: 14,
     fontWeight: "bold",
   },
@@ -467,200 +467,196 @@ instruccionesSection: {
   tempra: { color: '#118AB2' },
 
   // HEADER MEJORADO
-homeHeader: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  width: '100%',
-  paddingHorizontal: 20,
-  marginBottom: 10,
-},
+  homeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
 
-timeContainer: {
-  alignItems: 'flex-start',
-},
+  timeContainer: {
+    alignItems: 'flex-start',
+  },
 
-currentTime: {
-  fontSize: 28,
-  fontWeight: 'bold',
-  color: '#2d3748',
-},
+  currentTime: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#2d3748',
+  },
 
-currentDate: {
-  fontSize: 14,
-  color: '#718096',
-  marginTop: 4,
-},
+  currentDate: {
+    fontSize: 14,
+    color: '#718096',
+    marginTop: 4,
+  },
 
-// BOTÓN DE NOTIFICACIONES
-notificationButton: {
-  width: 50,
-  height: 50,
-  borderRadius: 25,
-  backgroundColor: '#ffffff',
-  justifyContent: 'center',
-  alignItems: 'center',
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-  elevation: 3,
-  borderWidth: 1,
-  borderColor: '#e2e8f0',
-},
+  // BOTÓN DE NOTIFICACIONES
+  notificationButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
 
-bellIcon: {
-  fontSize: 20,
-},
+  bellIcon: {
+    fontSize: 20,
+  },
 
-notificationBadge: {
-  position: 'absolute',
-  top: -5,
-  right: -5,
-  backgroundColor: '#e53e3e',
-  borderRadius: 10,
-  minWidth: 20,
-  height: 20,
-  justifyContent: 'center',
-  alignItems: 'center',
-},
+  notificationBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: '#e53e3e',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
-badgeText: {
-  color: 'white',
-  fontSize: 12,
-  fontWeight: 'bold',
-},
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
 
-// TEXTO DE BIENVENIDA
-welcomeText: {
-  fontSize: 14,
-  color: '#718096',
-  textAlign: 'center',
-  marginBottom: 30,
-  fontStyle: 'italic',
-},
+  // TEXTO DE BIENVENIDA
+  welcomeText: {
+    fontSize: 14,
+    color: '#718096',
+    textAlign: 'center',
+    marginBottom: 30,
+    fontStyle: 'italic',
+  },
 
-// MODAL DE NOTIFICACIONES
-modalOverlay: {
-  flex: 1,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  justifyContent: 'flex-end',
-},
+  // MODAL DE NOTIFICACIONES
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
 
-notificationsModal: {
-  backgroundColor: 'white',
-  borderTopLeftRadius: 20,
-  borderTopRightRadius: 20,
-  maxHeight: '80%',
-  minHeight: '40%',
-},
+  notificationsModal: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+    minHeight: '40%',
+  },
 
-modalHeader: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: 20,
-  borderBottomWidth: 1,
-  borderBottomColor: '#e2e8f0',
-},
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
 
-modalTitle: {
-  fontSize: 20,
-  fontWeight: 'bold',
-  color: '#2d3748',
-},
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2d3748',
+  },
 
-closeButton: {
-  width: 30,
-  height: 30,
-  borderRadius: 15,
-  backgroundColor: '#f7fafc',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
+  closeButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#f7fafc',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
-closeIcon: {
-  fontSize: 16,
-  color: '#4a5568',
-  fontWeight: 'bold',
-},
+  closeIcon: {
+    fontSize: 16,
+    color: '#4a5568',
+    fontWeight: 'bold',
+  },
 
-modalContent: {
-  padding: 20,
-},
+  modalContent: {
+    padding: 20,
+  },
 
-medicationModalItem: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  backgroundColor: '#f7fafc',
-  padding: 15,
-  borderRadius: 12,
-  marginBottom: 10,
-},
+  medicationModalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f7fafc',
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
 
-medicationIcon: {
-  width: 40,
-  height: 40,
-  borderRadius: 20,
-  backgroundColor: '#ebf8ff',
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginRight: 15,
-},
+  medicationIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ebf8ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
 
-pillIcon: {
-  fontSize: 18,
-},
+  pillIcon: {
+    fontSize: 18,
+  },
 
-medicationDetails: {
-  flex: 1,
-},
+  medicationDetails: {
+    flex: 1,
+  },
 
-medicationModalName: {
-  fontSize: 16,
-  fontWeight: '600',
-  color: '#2d3748',
-  marginBottom: 4,
-},
+  medicationModalName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2d3748',
+    marginBottom: 4,
+  },
 
-medicationModalTime: {
-  fontSize: 14,
-  color: '#718096',
-  marginBottom: 2,
-},
+  medicationModalTime: {
+    fontSize: 14,
+    color: '#718096',
+    marginBottom: 2,
+  },
 
-medicationModalInstructions: {
-  fontSize: 13,
-  color: '#a0aec0',
-  fontStyle: 'italic',
-},
+  medicationModalInstructions: {
+    fontSize: 13,
+    color: '#a0aec0',
+    fontStyle: 'italic',
+  },
 
-emptyModal: {
-  alignItems: 'center',
-  padding: 40,
-},
+  emptyModal: {
+    alignItems: 'center',
+    padding: 40,
+  },
 
-emptyModalIcon: {
-  fontSize: 40,
-  marginBottom: 15,
-},
+  emptyModalIcon: {
+    fontSize: 40,
+    marginBottom: 15,
+  },
 
-emptyModalText: {
-  fontSize: 16,
-  color: '#718096',
-  textAlign: 'center',
-  marginBottom: 8,
-},
+  emptyModalText: {
+    fontSize: 16,
+    color: '#718096',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
 
-emptyModalSubtext: {
-  fontSize: 14,
-  color: '#a0aec0',
-  textAlign: 'center',
-},
-  paracetamol: { color: "#FF6B6B" },
-  ibuprofeno: { color: "#4ECDC4" },
-  naproxeno: { color: "#FFD166" },
-  tempra: { color: "#118AB2" },
+  emptyModalSubtext: {
+    fontSize: 14,
+    color: '#a0aec0',
+    textAlign: 'center',
+  },
 
   // ===================== STATUS SCREEN =====================
   screenContainerStatus: {
@@ -730,6 +726,7 @@ emptyModalSubtext: {
     backgroundColor: '#28a74520',
     color: '#155724',
   },
+
   // ===================== PRESCRIPTION DETAIL SCREEN =====================
   doctorInfoContainer: {
     backgroundColor: '#e3f2fd',
@@ -796,93 +793,168 @@ emptyModalSubtext: {
     color: '#6c757d',
     textAlign: 'center'
   },
-// ===================== CALENDAR STYLES MEJORADOS =====================
-calendarWrapper: {
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '100%',
-},
-calendarContainer: {
-  backgroundColor: '#ffffff',
-  borderRadius: 16,
-  padding: 15,
-  marginTop: 10,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 8,
-  elevation: 4,
-  width: '100%',
-},
-calendarScrollContent: {
-  paddingHorizontal: 10,
-  alignItems: 'center',
-},
-dayChip: {
-  paddingVertical: 12,
-  paddingHorizontal: 16,
-  borderRadius: 12,
-  marginHorizontal: 4,
-  backgroundColor: '#f8f9fa',
-  alignItems: 'center',
-  justifyContent: 'center',
-  minWidth: 70,
-  borderWidth: 2,
-  borderColor: 'transparent',
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 1 },
-  shadowOpacity: 0.05,
-  shadowRadius: 2,
-  elevation: 1,
-},
-dayChipSelected: {
-  backgroundColor: '#007AFF',
-  borderColor: '#0056CC',
-  shadowColor: '#007AFF',
-  shadowOpacity: 0.3,
-  shadowRadius: 6,
-  shadowOffset: { width: 0, height: 3 },
-  elevation: 6,
-},
-dayChipToday: {
-  borderColor: '#007AFF',
-  backgroundColor: '#E3F2FD',
-},
-dayChipDow: {
-  fontSize: 14,
-  color: '#666',
-  fontWeight: '600',
-  marginBottom: 4,
-  textAlign: 'center',
-},
-dayChipNumber: {
-  fontSize: 18,
-  fontWeight: '700',
-  color: '#000',
-  textAlign: 'center',
-},
-dayChipSelectedText: {
-  color: '#ffffff',
-},
-dayChipTodayText: {
-  color: '#007AFF',
-},
-calendarDotRow: {
-  flexDirection: 'row',
-  marginTop: 6,
-  justifyContent: 'center',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-},
-calendarDot: {
-  fontSize: 16,
-  marginHorizontal: 1,
-  fontWeight: 'bold',
-},
-moreDots: {
-  fontSize: 10,
-  color: '#666',
-  fontWeight: '600',
-  marginLeft: 2,
-},
+
+  // ===================== CALENDAR STYLES MEJORADOS =====================
+  calendarWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  calendarContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 15,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    width: '100%',
+  },
+  calendarScrollContent: {
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
+  dayChip: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginHorizontal: 4,
+    backgroundColor: '#f8f9fa',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 70,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  dayChipSelected: {
+    backgroundColor: '#007AFF',
+    borderColor: '#0056CC',
+    shadowColor: '#007AFF',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 6,
+  },
+  dayChipToday: {
+    borderColor: '#007AFF',
+    backgroundColor: '#E3F2FD',
+  },
+  dayChipDow: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  dayChipNumber: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000',
+    textAlign: 'center',
+  },
+  dayChipSelectedText: {
+    color: '#ffffff',
+  },
+  dayChipTodayText: {
+    color: '#007AFF',
+  },
+  calendarDotRow: {
+    flexDirection: 'row',
+    marginTop: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  calendarDot: {
+    fontSize: 16,
+    marginHorizontal: 1,
+    fontWeight: 'bold',
+  },
+  moreDots: {
+    fontSize: 10,
+    color: '#666',
+    fontWeight: '600',
+    marginLeft: 2,
+  },
+
+  // ===================== PATIENT SECTION STYLES =====================
+  patientSection: {
+    marginBottom: 15,
+    padding: 12,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#007AFF',
+  },
+  patientTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#007AFF',
+    marginBottom: 4,
+  },
+  patientName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#2c3e50',
+  },
+
+  // ===================== TODAY HEADER STYLES =====================
+  todayHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  todayBullet: {
+    fontSize: 16,
+    color: '#007AFF',
+    marginRight: 8,
+  },
+  todayTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  todaySubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 15,
+  },
+
+  // ===================== MEDICATION LIST STYLES =====================
+  medicationList: {
+    width: '100%',
+  },
+  medicationTime: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 18,
+  },
+
+  // ===================== ALERT BOX STYLES =====================
+  alertBox: {
+    backgroundColor: '#fff3cd',
+    borderColor: '#ffeaa7',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 20,
+  },
+  alertTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#856404',
+    marginBottom: 8,
+  },
+  alertText: {
+    fontSize: 12,
+    color: '#856404',
+    marginBottom: 4,
+  }
 });
