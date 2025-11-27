@@ -454,12 +454,6 @@ export const styles = StyleSheet.create({
     color: "#007AFF",
   },
 
-  // ===================== COLORS FOR MEDICATIONS =====================
-  paracetamol: { color: '#FF6B6B' },
-  ibuprofeno: { color: '#4ECDC4' },
-  naproxeno: { color: '#FFD166' },
-  tempra: { color: '#118AB2' },
-
   // HEADER MEJORADO
   homeHeader: {
     flexDirection: 'row',
