@@ -4,11 +4,11 @@
     "slug": "Recordatorio-Medico",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/heartbeat_logo.png",
+    "icon": "./assets/heartbeat.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/heartbeat_logo.png",
+      "image": "./assets/heartbeat.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -23,7 +23,7 @@
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/heartbeat_logo.png"
+      "favicon": "./assets/heartbeat.png"
     }
   }
 }
