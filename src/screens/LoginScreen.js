@@ -13,7 +13,7 @@ import { useDualPress } from "../hooks/useDualPress";
 import { ScreenTitle } from "../components/ScreenTitle";
 import { styles } from "../styles/styles";
 
-const heartbeatLogo = require("../../assets/heartbeat.png");
+const heartbeatLogo = require("../../assets/heartbeat2.png");
 
 // URL de Lambda
 const API_URL =
