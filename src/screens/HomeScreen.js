@@ -57,6 +57,9 @@ export const HomeScreen = ({ navigation }) => {
               {isPressing ? 'Suelta para cancelar' : 'Iniciar Health Reminder'}
             </Text>
           </Pressable>
+          <View style={{ marginTop: 15, padding: 6, alignItems: "center" }}>
+             <Text style={{ fontSize: 12, color: "#666" }}>Versión: 2.6.22</Text>
+           </View>
 
           <StatusBar style="auto" />
         </View>
