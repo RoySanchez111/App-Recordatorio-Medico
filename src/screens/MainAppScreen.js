@@ -1,5 +1,4 @@
-import React, { useState, useContext } from 'react'; // Agregamos useRef
-import Reactt, {useCallback, useRef} from 'react'; //Agregamos callback
+import React, { useState, useContext, useCallback, useRef } from 'react'; 
 import { View, Text, ScrollView, Alert, ActivityIndicator } from 'react-native'; 
 import { useFocusEffect } from '@react-navigation/native'; 
 import { PrescriptionsContext } from '../contexts/AppContext';
@@ -10,6 +9,13 @@ import { MedicationItem } from '../components/common/MedicationItem';
 import { formatDate } from '../utils/dateUtils';
 import { styles } from '../styles/styles';
 
+// --- IMPORTAMOS EL CEREBRO DE NOTIFICACIONES ---
+import { 
+  registerForPushNotificationsAsync, 
+  scheduleMedicationReminder, 
+  cancelAllNotifications 
+} from '../utils/notifications';
+
 const API_URL = "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
 
 export const MainAppScreen = ({ navigation }) => {
@@ -17,35 +23,9 @@ export const MainAppScreen = ({ navigation }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   
-  // CORRECCIÓN 1: El estado inicial de carga depende de si ya tenemos datos.
   const [loading, setLoading] = useState(prescriptions.length === 0);
 
-  // Referencia para saber si es la primera carga o una actualización
-  const firstLoad = useRef(true);
-
-  // Función para calcular horarios basados en frecuencia y primera ingesta
-  const calcularHorariosFrecuencia = (primeraIngesta, frecuencia) => {
-    if (!primeraIngesta || !frecuencia) return [];
-    
-    const match = frecuencia.match(/\d+/);
-    if (!match) return [primeraIngesta];
-    
-    const frecuenciaHoras = parseInt(match[0]);
-    const horarios = [primeraIngesta];
-    const [hora, minuto] = primeraIngesta.split(':').map(Number);
-    
-    for (let i = 1; i <= 3; i++) {
-      const nuevaHoraTotal = hora + (frecuenciaHoras * i);
-      const nuevaHora = nuevaHoraTotal % 24;
-      const nuevaHoraStr = nuevaHora.toString().padStart(2, '0');
-      const nuevoMinutoStr = minuto.toString().padStart(2, '0');
-      
-      horarios.push(`${nuevaHoraStr}:${nuevoMinutoStr}`);
-    }
-    
-    return horarios;
-  };
-
+  // Helper simple para formatear horas (HH:MM -> 12h AM/PM)
   const formatTime = (timeString) => {
     if (!timeString || typeof timeString !== 'string') return '';
     const timeParts = timeString.split(':');
@@ -58,25 +38,22 @@ export const MainAppScreen = ({ navigation }) => {
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
   };
 
-  // --- CORRECCIÓN PRINCIPAL: useFocusEffect BLINDADO ---
   useFocusEffect(
     useCallback(() => {
       let isActive = true; 
 
       const fetchMedications = async () => {
+        // 1. Configurar notificaciones al entrar
+        await registerForPushNotificationsAsync();
+
         if (!user || !user.id) {
           if (isActive) setLoading(false);
           return;
         }
 
-        // CORRECCIÓN CRÍTICA:
-        // Si ya tenemos datos (prescriptions > 0), NO mostramos el loading.
-        // La actualización ocurre silenciosamente en el fondo ("background refresh").
-        // Solo mostramos loading si la lista está vacía.
         if (prescriptions.length === 0 && isActive) {
             setLoading(true);
         } else {
-            // Si ya hay datos, aseguramos que el loading esté apagado
             setLoading(false);
         }
 
@@ -95,10 +72,15 @@ export const MainAppScreen = ({ navigation }) => {
           if (response.ok && isActive) {
             const allMeds = [];
 
+            // Limpiamos notificaciones viejas para reprogramar con los datos frescos de la API
+            await cancelAllNotifications();
+
             if (Array.isArray(recetas)) {
-                recetas.forEach(receta => {
+                for (const receta of recetas) {
                     if (receta.medicamentos && Array.isArray(receta.medicamentos)) {
-                        receta.medicamentos.forEach(med => {
+                        for (const med of receta.medicamentos) {
+                            
+                            // Fechas
                             const fechaInicio = new Date(receta.fechaEmision);
                             let diasDuracion = 30; 
                             if (med.duracion) {
@@ -109,17 +91,31 @@ export const MainAppScreen = ({ navigation }) => {
                                 if (med.duracion.includes('meses') || med.duracion.includes('mes')) diasDuracion *= 30;
                               }
                             }
-
                             const fechaFin = new Date(fechaInicio);
                             fechaFin.setDate(fechaInicio.getDate() + diasDuracion);
 
+                            // --- MODIFICADO: USAR HORARIOS DIRECTOS DE LA API ---
+                            // Ya no calculamos nada aquí. Si la API manda horarios, los usamos.
+                            // Si no (fallback), usamos la primera ingesta como único horario.
                             let horariosMostrar = [];
-                            if (med.primeraIngesta && med.frecuencia) {
-                              horariosMostrar = calcularHorariosFrecuencia(med.primeraIngesta, med.frecuencia);
-                            } else if (med.frecuencia) {
-                              horariosMostrar = [med.frecuencia];
+                            if (med.horarios && Array.isArray(med.horarios) && med.horarios.length > 0) {
+                                horariosMostrar = med.horarios;
                             } else if (med.primeraIngesta) {
-                              horariosMostrar = [med.primeraIngesta];
+                                horariosMostrar = [med.primeraIngesta];
+                            }
+
+                            // Programar notificaciones locales usando los horarios de la API
+                            const hoy = new Date();
+                            if (hoy <= fechaFin) {
+                                for (const hora of horariosMostrar) {
+                                    if (hora && hora.includes(':')) {
+                                        await scheduleMedicationReminder(
+                                            med.nombre_medicamento, 
+                                            med.dosis, 
+                                            hora
+                                        );
+                                    }
+                                }
                             }
 
                             allMeds.push({
@@ -134,19 +130,17 @@ export const MainAppScreen = ({ navigation }) => {
                                 cantidadInicial: med.cantidadInicial,
                                 inicio: fechaInicio,
                                 fin: fechaFin,
-                                horarios: horariosMostrar.length > 0 ? horariosMostrar : ['Horario no especificado'],
+                                horarios: horariosMostrar, // Guardamos lo que vino de la API
                                 stock: med.cantidadInicial || 0,
                                 dosisPorToma: 1,
                                 esLargoPlazo: diasDuracion > 30,
                                 diasDuracion: diasDuracion
                             });
-                        });
+                        }
                     }
-                });
+                }
             }
             
-            // Actualizamos el contexto. React es inteligente: si los datos son iguales,
-            // no provocará un parpadeo visual molesto.
             setPrescriptions(allMeds);
           }
         } catch (error) {
@@ -159,7 +153,7 @@ export const MainAppScreen = ({ navigation }) => {
       fetchMedications();
 
       return () => { isActive = false; };
-    }, [user?.id]) // Quitamos 'prescriptions' de las dependencias para evitar bucles
+    }, [user?.id]) 
   );
 
   const getMedsForDate = (date) => {
@@ -180,8 +174,6 @@ export const MainAppScreen = ({ navigation }) => {
 
   const lowStock = getLowStockMeds();
 
-  // PANTALLA DE CARGA BLOQUEANTE
-  // Solo se muestra si REALMENTE no tenemos datos en memoria.
   if (loading && prescriptions.length === 0) {
     return (
       <View style={styles.screenContainer}>
@@ -264,10 +256,11 @@ export const MainAppScreen = ({ navigation }) => {
                       Duración: {med.duracion || 'No especificada'}
                     </Text>
 
+                    {/* MUESTRA LOS HORARIOS QUE VIENEN DE LA API */}
                     {med.horarios && med.horarios.length > 0 && (
                       <Text style={[styles.medicationTime, { marginBottom: 3 }]}>
                         Horarios: {med.horarios.map(hora => {
-                          if (hora.includes(':')) {
+                          if (hora && hora.includes(':')) {
                             return formatTime(hora);
                           }
                           return hora;
