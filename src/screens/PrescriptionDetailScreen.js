@@ -7,34 +7,9 @@ import { styles } from "../styles/styles";
 export default function PrescriptionDetailScreen({ route, navigation }) {
   const { receta, accessibilitySettings } = route.params;
 
-  // Función para calcular horarios basados en frecuencia y primera ingesta
-  const calcularHorariosFrecuencia = (primeraIngesta, frecuencia) => {
-    if (!primeraIngesta || !frecuencia) return [];
-
-    // Extraer número de horas de la frecuencia (ej: "cada 8 horas" -> 8)
-    const match = frecuencia.match(/\d+/);
-    if (!match) return [primeraIngesta];
-
-    const frecuenciaHoras = parseInt(match[0]);
-    const horarios = [primeraIngesta];
-    const [hora, minuto] = primeraIngesta.split(":").map(Number);
-
-    // Calcular las siguientes 3 tomas basadas en la frecuencia
-    for (let i = 1; i <= 3; i++) {
-      const nuevaHoraTotal = hora + frecuenciaHoras * i;
-      const nuevaHora = nuevaHoraTotal % 24;
-      const nuevaHoraStr = nuevaHora.toString().padStart(2, "0");
-      const nuevoMinutoStr = minuto.toString().padStart(2, "0");
-
-      horarios.push(`${nuevaHoraStr}:${nuevoMinutoStr}`);
-    }
-
-    return horarios;
-  };
-
-  // Formatear hora para mostrar
+  // Formatear hora (ej: "14:00" -> "2:00 PM")
   const formatTime = (timeString) => {
-    if (!timeString) return "No especificado";
+    if (!timeString) return "";
     const [hours, minutes] = timeString.split(":").map(Number);
     const ampm = hours >= 12 ? "PM" : "AM";
     const displayHours = hours % 12 || 12;
@@ -68,7 +43,7 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
               </View>
             )}
 
-            {/* Medicamentos con detalles REALES de la API */}
+            {/* Medicamentos */}
             <View
               style={[
                 styles.infoCard,
@@ -81,22 +56,10 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
 
               {receta.medicamentos && receta.medicamentos.length > 0 ? (
                 receta.medicamentos.map((medicamento, index) => {
-                  const duracion = medicamento.duracion;
-                  const frecuencia = medicamento.frecuencia;
-                  const primeraIngesta = medicamento.primeraIngesta;
-
-                  // Calcular horarios si hay frecuencia y primera ingesta
-                  let horariosMostrar = [];
-                  if (primeraIngesta && frecuencia) {
-                    horariosMostrar = calcularHorariosFrecuencia(
-                      primeraIngesta,
-                      frecuencia
-                    );
-                  } else if (frecuencia) {
-                    horariosMostrar = [frecuencia];
-                  } else if (primeraIngesta) {
-                    horariosMostrar = [primeraIngesta];
-                  }
+                  
+                  // ASUNCIÓN: La API trae una propiedad 'horarios' que es un array de strings ["08:00", "16:00"]
+                  // Si tu propiedad se llama diferente (ej: 'listaHoras'), cámbialo aquí.
+                  const horariosFijos = medicamento.horarios || []; 
 
                   return (
                     <View
@@ -113,7 +76,7 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
                         },
                       ]}
                     >
-                      {/* Nombre del medicamento */}
+                      {/* Nombre */}
                       <Text
                         style={[
                           styles.medicationName,
@@ -125,13 +88,11 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
                           },
                         ]}
                       >
-                        {medicamento.nombre_medicamento ||
-                          "Medicamento no especificado"}
+                        {medicamento.nombre_medicamento || "Medicamento"}
                       </Text>
 
-                      {/* Información del medicamento en columnas */}
+                      {/* Detalles Generales */}
                       <View style={styles.medicationInfoContainer}>
-                        {/* Dosis */}
                         <View style={styles.detailSection}>
                           <Text style={styles.detailLabel}>Dosis:</Text>
                           <Text style={styles.detailValue}>
@@ -139,67 +100,30 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
                           </Text>
                         </View>
 
-                        {/* Duración */}
                         <View style={styles.detailSection}>
                           <Text style={styles.detailLabel}>Duración:</Text>
                           <Text style={styles.detailValue}>
-                            {duracion || "No especificada"}
+                            {medicamento.duracion || "No especificada"}
                           </Text>
                         </View>
-
-                        {/* Frecuencia */}
-                        {frecuencia && (
-                          <View style={styles.detailSection}>
-                            <Text style={styles.detailLabel}>Frecuencia:</Text>
-                            <Text style={styles.detailValue}>
-                              {frecuencia}
-                            </Text>
-                          </View>
-                        )}
-
-                        {/* Primera ingesta */}
-                        {primeraIngesta && (
-                          <View style={styles.detailSection}>
-                            <Text style={styles.detailLabel}>Primera toma:</Text>
-                            <Text style={styles.detailValue}>
-                              {formatTime(primeraIngesta)}
-                            </Text>
-                          </View>
-                        )}
                       </View>
 
-                      {/* Horarios calculados COMPLETOS */}
-                      {horariosMostrar.length > 0 && (
+                      {/* ----- SECCIÓN DE HORARIOS FIJOS ----- */}
+                      {/* Solo se muestra si la lista 'horarios' tiene elementos */}
+                      {horariosFijos.length > 0 && (
                         <View style={styles.horariosSection}>
-                          <Text
-                            style={[styles.detailLabel, { marginBottom: 10 }]}
-                          >
+                          <Text style={[styles.detailLabel, { marginBottom: 10, marginTop: 10 }]}>
                             Horarios de toma:
                           </Text>
+                          
                           <View style={styles.horariosContainer}>
-                            {horariosMostrar.map((hora, idx) => (
+                            {horariosFijos.map((hora, idx) => (
                               <View
                                 key={idx}
-                                style={[
-                                  styles.horarioTagContainer,
-                                  primeraIngesta &&
-                                  hora === primeraIngesta
-                                    ? styles.horarioPrincipal
-                                    : {},
-                                ]}
+                                style={styles.horarioTagContainer} 
                               >
-                                <Text
-                                  style={[
-                                    styles.horarioTag,
-                                    primeraIngesta &&
-                                    hora === primeraIngesta
-                                      ? styles.horarioPrincipalText
-                                      : {},
-                                  ]}
-                                >
-                                  {hora.includes(":")
-                                    ? formatTime(hora)
-                                    : hora}
+                                <Text style={styles.horarioTag}>
+                                  {formatTime(hora)}
                                 </Text>
                               </View>
                             ))}
@@ -207,15 +131,10 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
                         </View>
                       )}
 
-                      {/* Instrucciones adicionales */}
+                      {/* Instrucciones */}
                       {medicamento.instrucciones && (
                         <View style={styles.instruccionesSection}>
-                          <Text
-                            style={[
-                              styles.detailLabel,
-                              { marginBottom: 8 },
-                            ]}
-                          >
+                          <Text style={[styles.detailLabel, { marginBottom: 8, marginTop: 10 }]}>
                             Instrucciones:
                           </Text>
                           <Text
@@ -238,7 +157,7 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
               ) : (
                 <View style={styles.noMedicamentosContainer}>
                   <Text style={styles.noMedicamentosText}>
-                    No hay medicamentos registrados en esta receta.
+                    No hay medicamentos registrados.
                   </Text>
                 </View>
               )}
@@ -247,12 +166,8 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
             <View style={{ height: 40 }} />
           </ScrollView>
 
-          {/* -------- BOTÓN ABAJO -------- */}
-          <View style={{ 
-            width: "100%", 
-            paddingHorizontal: 20, 
-            marginBottom: 20 
-          }}>
+          {/* Botón Volver */}
+          <View style={{ width: "100%", paddingHorizontal: 20, marginBottom: 20 }}>
             <Pressable
               onPress={() => navigation.goBack()}
               style={{
@@ -265,11 +180,7 @@ export default function PrescriptionDetailScreen({ route, navigation }) {
                 elevation: 2
               }}
             >
-              <Text style={{ 
-                color: "#fff", 
-                fontSize: 16, 
-                fontWeight: "600" 
-              }}>
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>
                 ← Volver a mis recetas
               </Text>
             </Pressable>
