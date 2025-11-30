@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback, useRef } from 'react'; 
+import React, { useState, useContext, useCallback } from 'react'; 
 import { View, Text, ScrollView, Alert, ActivityIndicator } from 'react-native'; 
 import { useFocusEffect } from '@react-navigation/native'; 
 import { PrescriptionsContext } from '../contexts/AppContext';
@@ -6,7 +6,6 @@ import { ScreenTitle } from '../components/ScreenTitle';
 import { BottomNav } from '../components/BottomNav';
 import { CalendarStrip } from '../components/common/CalendarStrip';
 import { MedicationItem } from '../components/common/MedicationItem';
-import { formatDate } from '../utils/dateUtils';
 import { styles } from '../styles/styles';
 
 // --- IMPORTAMOS EL CEREBRO DE NOTIFICACIONES ---
@@ -95,14 +94,17 @@ export const MainAppScreen = ({ navigation }) => {
                             fechaFin.setDate(fechaInicio.getDate() + diasDuracion);
 
                             // --- MODIFICADO: USAR HORARIOS DIRECTOS DE LA API ---
-                            // Ya no calculamos nada aquí. Si la API manda horarios, los usamos.
-                            // Si no (fallback), usamos la primera ingesta como único horario.
+                            // Obtenemos los horarios guardados por el doctor (Manuales o Calculados en Backend)
                             let horariosMostrar = [];
                             if (med.horarios && Array.isArray(med.horarios) && med.horarios.length > 0) {
                                 horariosMostrar = med.horarios;
                             } else if (med.primeraIngesta) {
+                                // Fallback para recetas muy viejas sin array de horarios
                                 horariosMostrar = [med.primeraIngesta];
                             }
+
+                            // Ordenamos las horas cronológicamente para que se vean bonitas (08:00, 14:00, 20:00)
+                            horariosMostrar.sort();
 
                             // Programar notificaciones locales usando los horarios de la API
                             const hoy = new Date();
@@ -130,7 +132,7 @@ export const MainAppScreen = ({ navigation }) => {
                                 cantidadInicial: med.cantidadInicial,
                                 inicio: fechaInicio,
                                 fin: fechaFin,
-                                horarios: horariosMostrar, // Guardamos lo que vino de la API
+                                horarios: horariosMostrar, // Guardamos la lista ordenada
                                 stock: med.cantidadInicial || 0,
                                 dosisPorToma: 1,
                                 esLargoPlazo: diasDuracion > 30,
@@ -256,7 +258,7 @@ export const MainAppScreen = ({ navigation }) => {
                       Duración: {med.duracion || 'No especificada'}
                     </Text>
 
-                    {/* MUESTRA LOS HORARIOS QUE VIENEN DE LA API */}
+                    {/* MUESTRA TODOS LOS HORARIOS MANUALES O CALCULADOS DE LA API */}
                     {med.horarios && med.horarios.length > 0 && (
                       <Text style={[styles.medicationTime, { marginBottom: 3 }]}>
                         Horarios: {med.horarios.map(hora => {
