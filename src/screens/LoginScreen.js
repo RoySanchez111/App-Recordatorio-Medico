@@ -27,24 +27,6 @@ export const LoginScreen = ({ navigation }) => {
   const { accessibilitySettings, setUser, setPrescriptions } =
     useContext(PrescriptionsContext);
 
-  // Función auxiliar para calcular horarios
-  const calcularHorariosFrecuencia = (primeraIngesta, frecuencia) => {
-    if (!primeraIngesta || !frecuencia) return [];
-    const match = frecuencia.match(/\d+/);
-    if (!match) return [primeraIngesta];
-    const frecuenciaHoras = parseInt(match[0]);
-    const horarios = [primeraIngesta];
-    const [hora, minuto] = primeraIngesta.split(":").map(Number);
-    for (let i = 1; i <= 3; i++) {
-      const nuevaHoraTotal = hora + frecuenciaHoras * i;
-      const nuevaHora = nuevaHoraTotal % 24;
-      const nuevaHoraStr = nuevaHora.toString().padStart(2, "0");
-      const nuevoMinutoStr = minuto.toString().padStart(2, "0");
-      horarios.push(`${nuevaHoraStr}:${nuevoMinutoStr}`);
-    }
-    return horarios;
-  };
-
   const handleLogin = async () => {
     if (!claveUnica || !contrasena) {
       Alert.alert("Error", "Por favor ingresa tu clave única y contraseña");
@@ -70,9 +52,6 @@ export const LoginScreen = ({ navigation }) => {
       const loginData = await loginResponse.json();
 
       if (loginResponse.ok && loginData.user && loginData.user.esPaciente) {
-        // --- CORRECCIÓN: NO guardamos el usuario todavía ---
-        // Esperamos a tener las recetas para guardar todo junto y evitar el parpadeo en MainApp
-
         let allMeds = [];
 
         try {
@@ -115,16 +94,16 @@ export const LoginScreen = ({ navigation }) => {
                     const fechaFin = new Date(fechaInicio);
                     fechaFin.setDate(fechaInicio.getDate() + diasDuracion);
 
+                    // CAMBIO: Usar directamente horasfijas del API en lugar de calcular
                     let horariosMostrar = [];
-                    if (med.primeraIngesta && med.frecuencia) {
-                      horariosMostrar = calcularHorariosFrecuencia(
-                        med.primeraIngesta,
-                        med.frecuencia
-                      );
-                    } else if (med.frecuencia) {
-                      horariosMostrar = [med.frecuencia];
+                    if (med.horasfijas && Array.isArray(med.horasfijas) && med.horasfijas.length > 0) {
+                      // Usar las horas fijas definidas por el doctor
+                      horariosMostrar = med.horasfijas;
                     } else if (med.primeraIngesta) {
+                      // Fallback a primera ingesta si no hay horas fijas
                       horariosMostrar = [med.primeraIngesta];
+                    } else {
+                      horariosMostrar = ["Horario no especificado"];
                     }
 
                     allMeds.push({
@@ -139,10 +118,7 @@ export const LoginScreen = ({ navigation }) => {
                       cantidadInicial: med.cantidadInicial,
                       inicio: fechaInicio,
                       fin: fechaFin,
-                      horarios:
-                        horariosMostrar.length > 0
-                          ? horariosMostrar
-                          : ["Horario no especificado"],
+                      horarios: horariosMostrar,
                       stock: med.cantidadInicial || 0,
                       dosisPorToma: 1,
                       esLargoPlazo: diasDuracion > 30,
@@ -161,12 +137,9 @@ export const LoginScreen = ({ navigation }) => {
         }
 
         // 3. GUARDADO ATÓMICO
-        // Actualizamos Recetas Y Usuario al mismo tiempo.
-        // Al hacer esto, cuando MainApp se monte, YA tendrá las recetas listas.
         setPrescriptions(allMeds);
         setUser(loginData.user);
 
-        // Pequeño delay para asegurar que el Contexto se propague antes de cambiar de pantalla
         setTimeout(() => {
           navigation.navigate("MainApp");
         }, 100);

@@ -7,14 +7,11 @@ import { BottomNav } from '../components/BottomNav';
 import { CalendarStrip } from '../components/common/CalendarStrip';
 import { MedicationItem } from '../components/common/MedicationItem';
 import { styles } from '../styles/styles';
-
-// --- IMPORTAMOS EL CEREBRO DE NOTIFICACIONES ---
 import { 
   registerForPushNotificationsAsync, 
   scheduleMedicationReminder, 
   cancelAllNotifications 
 } from '../utils/notifications';
-
 const API_URL = "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
 
 export const MainAppScreen = ({ navigation }) => {
@@ -24,7 +21,6 @@ export const MainAppScreen = ({ navigation }) => {
   
   const [loading, setLoading] = useState(prescriptions.length === 0);
 
-  // Helper simple para formatear horas (HH:MM -> 12h AM/PM)
   const formatTime = (timeString) => {
     if (!timeString || typeof timeString !== 'string') return '';
     const timeParts = timeString.split(':');
@@ -42,9 +38,7 @@ export const MainAppScreen = ({ navigation }) => {
       let isActive = true; 
 
       const fetchMedications = async () => {
-        // 1. Configurar notificaciones al entrar
-        await registerForPushNotificationsAsync();
-
+      await registerForPushNotificationsAsync();
         if (!user || !user.id) {
           if (isActive) setLoading(false);
           return;
@@ -70,8 +64,6 @@ export const MainAppScreen = ({ navigation }) => {
 
           if (response.ok && isActive) {
             const allMeds = [];
-
-            // Limpiamos notificaciones viejas para reprogramar con los datos frescos de la API
             await cancelAllNotifications();
 
             if (Array.isArray(recetas)) {
@@ -93,8 +85,7 @@ export const MainAppScreen = ({ navigation }) => {
                             const fechaFin = new Date(fechaInicio);
                             fechaFin.setDate(fechaInicio.getDate() + diasDuracion);
 
-                            // --- MODIFICADO: USAR HORARIOS DIRECTOS DE LA API ---
-                            // Obtenemos los horarios guardados por el doctor (Manuales o Calculados en Backend)
+                            // CAMBIO: Usar directamente horasfijas del API en lugar de calcular
                             let horariosMostrar = [];
                             if (med.horarios && Array.isArray(med.horarios) && med.horarios.length > 0) {
                                 horariosMostrar = med.horarios;
@@ -132,7 +123,7 @@ export const MainAppScreen = ({ navigation }) => {
                                 cantidadInicial: med.cantidadInicial,
                                 inicio: fechaInicio,
                                 fin: fechaFin,
-                                horarios: horariosMostrar, // Guardamos la lista ordenada
+                                horarios: horariosMostrar,
                                 stock: med.cantidadInicial || 0,
                                 dosisPorToma: 1,
                                 esLargoPlazo: diasDuracion > 30,
@@ -155,7 +146,7 @@ export const MainAppScreen = ({ navigation }) => {
       fetchMedications();
 
       return () => { isActive = false; };
-    }, [user?.id]) 
+    }, [user?.id])
   );
 
   const getMedsForDate = (date) => {
