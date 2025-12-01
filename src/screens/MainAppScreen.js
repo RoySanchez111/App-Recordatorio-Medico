@@ -15,7 +15,7 @@ import {
 const API_URL = "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
 
 export const MainAppScreen = ({ navigation }) => {
-  const { prescriptions, setPrescriptions, accessibilitySettings, user } = useContext(PrescriptionsContext);
+  const { prescriptions, setPrescriptions, accessibilitySettings, user, getMedicationColor } = useContext(PrescriptionsContext);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   
@@ -237,7 +237,7 @@ export const MainAppScreen = ({ navigation }) => {
               <View style={styles.medicationList}>
                 {getMedsForDate(selectedDate).map((med) => (
                   <View key={med.id} style={styles.medicationDetailCard}>
-                    <Text style={[styles.medicationName, { marginBottom: 5 }]}>
+                    <Text style={[styles.medicationName, { marginBottom: 5, color: getMedicationColor(med.nombre) }]}>
                       {med.nombre}
                     </Text>
                     

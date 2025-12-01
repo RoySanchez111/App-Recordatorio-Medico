@@ -58,7 +58,7 @@ export const HomeScreen = ({ navigation }) => {
             </Text>
           </Pressable>
           <View style={{ marginTop: 15, padding: 6, alignItems: "center" }}>
-             <Text style={{ fontSize: 12, color: "#666" }}>Versión: 2.6.22</Text>
+             <Text style={{ fontSize: 12, color: "#666" }}>Versión: 2.7.26</Text>
            </View>
 
           <StatusBar style="auto" />

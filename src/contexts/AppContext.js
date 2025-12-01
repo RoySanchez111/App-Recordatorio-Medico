@@ -7,7 +7,6 @@ export const PrescriptionsContext = createContext();
 // Paleta de colores para los medicamentos (De la versión Incoming)
 const VIBRANT_COLOR_PALETTE = [
     '#FF8C00', // 1. Naranja Brillante
-    '#1E90FF', // 2. Azul Dodger Brillante
     '#32CD32', // 3. Verde Lima Brillante
     '#FF1493', // 4. Rosa Profundo Brillante
     '#9932CC', // 5. Morado Oscuro Brillante

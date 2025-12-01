@@ -193,13 +193,6 @@ export const PrescriptionScreen = ({ navigation }) => {
                     {receta.diagnostico || 'Diagnóstico no especificado'}
                   </Text>
 
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
-                    <Text style={{ fontSize: 14, color: '#7f8c8d', marginRight: 5 }}>Dr.</Text>
-                    <Text style={{ fontSize: 14, color: '#34495e' }}>
-                        {receta.doctorNombre || 'Médico General'}
-                    </Text>
-                  </View>
-
                   <Text style={[styles.cardContent, { marginTop: 8, fontSize: 13, color: '#7f8c8d' }]}>
                     💊 {receta.medicamentos?.length || 0} medicamento(s) • {duracion}
                   </Text>

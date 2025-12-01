@@ -349,8 +349,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   medicationName: {
-    fontSize: 14,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "900",
   },
   changePasswordButton: {
     flexDirection: "row",
