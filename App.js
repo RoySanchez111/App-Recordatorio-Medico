@@ -1,9 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Platform, LogBox } from 'react-native';
+import { LogBox } from 'react-native';
 import * as Notifications from 'expo-notifications';
+
+// Contexto
 import { AppProvider } from './src/contexts/AppContext';
+
+// Pantallas
 import { HomeScreen } from './src/screens/HomeScreen';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { MainAppScreen } from './src/screens/MainAppScreen';
@@ -14,49 +18,42 @@ import { ChangePasswordScreen } from './src/screens/ChangePasswordScreen';
 import PrescriptionDetailScreen from "./src/screens/PrescriptionDetailScreen";
 import { AppointmentStatusScreen } from "./src/screens/AppointmentStatusScreen";
 
-// Ignorar el warning de expo-notifications en Expo Go
+// Importamos la lógica centralizada de notificaciones
+// (Esto asegura que el canal 'default' se cree igual aquí que en MainApp)
+import { registerForPushNotificationsAsync } from './src/utils/notifications'; 
+
+// Ignorar warnings de Expo Go
 LogBox.ignoreLogs([
   'expo-notifications: Android Push notifications',
 ]);
 
 const Stack = createStackNavigator();
 
-// Configurar el manejo de notificaciones
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
-
 export default function App() {
   const notificationListener = useRef();
   const responseListener = useRef();
 
   useEffect(() => {
-    // Solicitar permisos para notificaciones al iniciar la app
+    // 1. Inicializar permisos y canales (Usando tu archivo utils/notifications.js)
+    // Esto arregla el conflicto de canales en Android
     registerForPushNotificationsAsync();
-    createNotificationChannel();
 
-    // Escuchar notificaciones recibidas mientras la app está en primer plano
+    // 2. Escuchar notificaciones en primer plano
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      console.log('📱 Notificación recibida:', notification);
+      console.log('📱 Notificación recibida en primer plano:', notification);
     });
 
-    // Escuchar cuando el usuario toca una notificación
+    // 3. Escuchar interacción (cuando tocan la notificación)
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       console.log('👆 Usuario tocó la notificación:', response);
-      const { medicationId } = response.notification.request.content.data;
+      const { data } = response.notification.request.content;
       
-      if (medicationId) {
-        console.log('💊 Notificación de medicamento con ID:', medicationId);
-        // Aquí podrías navegar a la pantalla de medicamentos si quieres
-        // navigation.navigate('Prescription');
+      // Aquí puedes agregar lógica de navegación global si lo necesitas
+      if (data?.medicationId) {
+        console.log('💊 ID de medicamento:', data.medicationId);
       }
     });
 
-    // Limpieza al desmontar el componente
     return () => {
       if (notificationListener.current) {
         Notifications.removeNotificationSubscription(notificationListener.current);
@@ -67,50 +64,8 @@ export default function App() {
     };
   }, []);
 
-  // Función para crear canal de notificaciones (Android)
-  async function createNotificationChannel() {
-    if (Platform.OS === 'android') {
-      try {
-        await Notifications.setNotificationChannelAsync('medication-reminders', {
-          name: 'Recordatorios de Medicamentos',
-          importance: Notifications.AndroidImportance.HIGH,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#4CAF50',
-          sound: 'default',
-          enableVibrate: true,
-          showBadge: true,
-        });
-        console.log('✅ Canal de notificaciones creado');
-      } catch (error) {
-        console.error('❌ Error creando canal:', error);
-      }
-    }
-  }
-
-  // Función para registrar permisos de notificaciones (solo locales)
-  async function registerForPushNotificationsAsync() {
-    try {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      
-      if (finalStatus !== 'granted') {
-        console.log('⚠️ Permisos de notificación no concedidos');
-        return;
-      }
-      
-      console.log('✅ Permisos de notificación concedidos para notificaciones locales');
-      
-    } catch (error) {
-      console.error('❌ Error al solicitar permisos de notificación:', error);
-    }
-  }
-
   return (
+    // ✅ EL APP PROVIDER ESTÁ PERFECTO AQUÍ
     <AppProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Home">
