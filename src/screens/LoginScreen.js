@@ -13,11 +13,10 @@ import { useDualPress } from "../hooks/useDualPress";
 import { ScreenTitle } from "../components/ScreenTitle";
 import { styles } from "../styles/styles";
 
-const heartbeatLogo = require("../../assets/heartbeat2.png");
+const heartbeatLogo = require("../../assets/heartbeat_logo.png");
 
 // URL de Lambda
-const API_URL =
-  "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
+const API_URL = "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
 
 export const LoginScreen = ({ navigation }) => {
   const [claveUnica, setClaveUnica] = useState("");
@@ -55,7 +54,7 @@ export const LoginScreen = ({ navigation }) => {
         let allMeds = [];
 
         try {
-          // 2. PRECARGA DE DATOS
+          // 2. PRECARGA DE DATOS (Critical Prefetch)
           const recetasResponse = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -73,19 +72,21 @@ export const LoginScreen = ({ navigation }) => {
                 if (receta.medicamentos && Array.isArray(receta.medicamentos)) {
                   receta.medicamentos.forEach((med) => {
                     const fechaInicio = new Date(receta.fechaEmision);
+                    fechaInicio.setHours(0, 0, 0, 0);
+
                     let diasDuracion = 30;
                     if (med.duracion) {
                       const matchDuracion = med.duracion.match(/\d+/);
                       if (matchDuracion) {
                         diasDuracion = parseInt(matchDuracion[0], 10);
                         if (
-                          med.duracion.includes("semanas") ||
-                          med.duracion.includes("semana")
+                          med.duracion.toLowerCase().includes("semanas") ||
+                          med.duracion.toLowerCase().includes("semana")
                         )
                           diasDuracion *= 7;
                         if (
-                          med.duracion.includes("meses") ||
-                          med.duracion.includes("mes")
+                          med.duracion.toLowerCase().includes("meses") ||
+                          med.duracion.toLowerCase().includes("mes")
                         )
                           diasDuracion *= 30;
                       }
@@ -93,18 +94,20 @@ export const LoginScreen = ({ navigation }) => {
 
                     const fechaFin = new Date(fechaInicio);
                     fechaFin.setDate(fechaInicio.getDate() + diasDuracion);
+                    fechaFin.setHours(23, 59, 59, 999);
 
-                    // CAMBIO: Usar directamente horasfijas del API en lugar de calcular
+                    // --- MAPEO DE HORARIOS ---
                     let horariosMostrar = [];
-                    if (med.horasfijas && Array.isArray(med.horasfijas) && med.horasfijas.length > 0) {
-                      // Usar las horas fijas definidas por el doctor
-                      horariosMostrar = med.horasfijas;
+
+                    if (med.horarios && Array.isArray(med.horarios) && med.horarios.length > 0) {
+                      horariosMostrar = med.horarios;
                     } else if (med.primeraIngesta) {
-                      // Fallback a primera ingesta si no hay horas fijas
                       horariosMostrar = [med.primeraIngesta];
                     } else {
                       horariosMostrar = ["Horario no especificado"];
                     }
+
+                    horariosMostrar.sort();
 
                     allMeds.push({
                       id: med.id || `${receta.id}-${med.nombre_medicamento}`,
@@ -136,7 +139,7 @@ export const LoginScreen = ({ navigation }) => {
           );
         }
 
-        // 3. GUARDADO ATÓMICO
+        // 3. GUARDADO ATÓMICO EN CONTEXTO
         setPrescriptions(allMeds);
         setUser(loginData.user);
 
@@ -196,7 +199,7 @@ export const LoginScreen = ({ navigation }) => {
               placeholderTextColor="#666"
               value={claveUnica}
               onChangeText={(text) => setClaveUnica(text.toUpperCase())}
-              autoCapitalize="none"
+              autoCapitalize="characters"
               autoCorrect={false}
               editable={!loading}
             />
