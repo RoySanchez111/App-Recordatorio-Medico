@@ -1,17 +1,18 @@
-import React, { useState, useContext, useCallback } from 'react'; 
-import { View, Text, ScrollView, Alert, ActivityIndicator } from 'react-native'; 
-import { useFocusEffect } from '@react-navigation/native'; 
+import React, { useState, useContext, useCallback, useRef } from 'react';
+import { View, Text, ScrollView, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { PrescriptionsContext } from '../contexts/AppContext';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { BottomNav } from '../components/BottomNav';
 import { CalendarStrip } from '../components/common/CalendarStrip';
-import { MedicationItem } from '../components/common/MedicationItem';
 import { styles } from '../styles/styles';
+
 import { 
   registerForPushNotificationsAsync, 
-  scheduleMedicationReminder, 
-  cancelAllNotifications 
+  synchronizeLocalNotifications,
+  cancelAllNotifications // <--- Importamos esto para el botón de limpieza
 } from '../utils/notifications';
+
 const API_URL = "https://a6p5u37ybkzmvauf4lko6j3yda0qgkcb.lambda-url.us-east-1.on.aws/";
 
 export const MainAppScreen = ({ navigation }) => {
@@ -20,6 +21,9 @@ export const MainAppScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   
   const [loading, setLoading] = useState(prescriptions.length === 0);
+  
+  // Bloqueo para evitar llamadas dobles rápidas
+  const isProcessingRef = useRef(false);
 
   const formatTime = (timeString) => {
     if (!timeString || typeof timeString !== 'string') return '';
@@ -33,24 +37,46 @@ export const MainAppScreen = ({ navigation }) => {
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
   };
 
+  // Función de emergencia para el botón
+  const handleEmergencyCleanup = async () => {
+    Alert.alert(
+      "¿Limpiar Alertas?",
+      "Esto borrará todas las alarmas del celular. Se volverán a programar correctamente la próxima vez que entres a esta pantalla.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Borrar Todo", 
+          style: "destructive", 
+          onPress: async () => {
+            await cancelAllNotifications();
+            Alert.alert("Listo", "Notificaciones limpiadas. Recarga la pantalla para sincronizar.");
+          }
+        }
+      ]
+    );
+  };
+
   useFocusEffect(
     useCallback(() => {
       let isActive = true; 
 
-      const fetchMedications = async () => {
-      await registerForPushNotificationsAsync();
+      const fetchAndSchedule = async () => {
+        if (isProcessingRef.current) return;
+        isProcessingRef.current = true;
+
+        await registerForPushNotificationsAsync();
+
         if (!user || !user.id) {
           if (isActive) setLoading(false);
+          isProcessingRef.current = false;
           return;
         }
 
-        if (prescriptions.length === 0 && isActive) {
-            setLoading(true);
-        } else {
-            setLoading(false);
-        }
+        if (prescriptions.length === 0 && isActive) setLoading(true);
+        else setLoading(false);
 
         try {
+          // 1. OBTENER DATOS DE LA API
           const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -64,49 +90,60 @@ export const MainAppScreen = ({ navigation }) => {
 
           if (response.ok && isActive) {
             const allMeds = [];
-            await cancelAllNotifications();
+            const alarmasDeseadas = []; 
+            
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
 
             if (Array.isArray(recetas)) {
                 for (const receta of recetas) {
                     if (receta.medicamentos && Array.isArray(receta.medicamentos)) {
                         for (const med of receta.medicamentos) {
                             
-                            // Fechas
+                            // --- CÁLCULO DE FECHAS ---
                             const fechaInicio = new Date(receta.fechaEmision);
+                            fechaInicio.setHours(0, 0, 0, 0);
+
                             let diasDuracion = 30; 
                             if (med.duracion) {
-                              const matchDuracion = med.duracion.match(/\d+/);
-                              if (matchDuracion) {
-                                diasDuracion = parseInt(matchDuracion[0], 10);
-                                if (med.duracion.includes('semanas') || med.duracion.includes('semana')) diasDuracion *= 7;
-                                if (med.duracion.includes('meses') || med.duracion.includes('mes')) diasDuracion *= 30;
+                              const match = med.duracion.match(/\d+/);
+                              if (match) {
+                                diasDuracion = parseInt(match[0], 10);
+                                if (med.duracion.toLowerCase().includes('semana')) diasDuracion *= 7;
+                                if (med.duracion.toLowerCase().includes('mes')) diasDuracion *= 30;
                               }
                             }
                             const fechaFin = new Date(fechaInicio);
                             fechaFin.setDate(fechaInicio.getDate() + diasDuracion);
+                            fechaFin.setHours(23, 59, 59, 999);
 
-                            // CAMBIO: Usar directamente horasfijas del API en lugar de calcular
+                            // --- NORMALIZACIÓN DE HORARIOS ---
                             let horariosMostrar = [];
                             if (med.horarios && Array.isArray(med.horarios) && med.horarios.length > 0) {
                                 horariosMostrar = med.horarios;
                             } else if (med.primeraIngesta) {
-                                // Fallback para recetas muy viejas sin array de horarios
                                 horariosMostrar = [med.primeraIngesta];
                             }
-
-                            // Ordenamos las horas cronológicamente para que se vean bonitas (08:00, 14:00, 20:00)
                             horariosMostrar.sort();
 
-                            // Programar notificaciones locales usando los horarios de la API
-                            const hoy = new Date();
-                            if (hoy <= fechaFin) {
+                            // --- PREPARAR ALARMAS (Solo si la fecha es válida) ---
+                            if (hoy.getTime() <= fechaFin.getTime()) {
                                 for (const hora of horariosMostrar) {
-                                    if (hora && hora.includes(':')) {
-                                        await scheduleMedicationReminder(
-                                            med.nombre_medicamento, 
-                                            med.dosis, 
-                                            hora
-                                        );
+                                    if (hora && typeof hora === 'string' && hora.includes(':')) {
+                                        const [hStr, mStr] = hora.split(':');
+                                        const h = parseInt(hStr, 10);
+                                        const m = parseInt(mStr, 10);
+                                        
+                                        // VALIDACIÓN CRÍTICA: Solo agregamos si son números reales
+                                        if (!isNaN(h) && !isNaN(m)) {
+                                            alarmasDeseadas.push({
+                                                title: `💊 Hora de tu medicina`,
+                                                body: `Te toca tomar: ${med.nombre_medicamento} ${med.dosis ? '(' + med.dosis + ')' : ''}`,
+                                                hour: h,
+                                                minute: m,
+                                                data: { nombre: med.nombre_medicamento, dosis: med.dosis }
+                                            });
+                                        }
                                     }
                                 }
                             }
@@ -134,19 +171,26 @@ export const MainAppScreen = ({ navigation }) => {
                 }
             }
             
+            // Actualizamos la UI
             setPrescriptions(allMeds);
+
+            // --- LLAMADA A SINCRONIZACIÓN INTELIGENTE ---
+            // Le pasamos la lista limpia y confiamos en que notifications.js filtre los duplicados
+            console.log(`📡 Procesando ${alarmasDeseadas.length} alarmas...`);
+            await synchronizeLocalNotifications(alarmasDeseadas);
           }
         } catch (error) {
-          console.error('Error fetching medications:', error);
+          console.error('Error fetching/scheduling:', error);
         } finally {
           if (isActive) setLoading(false);
+          isProcessingRef.current = false;
         }
       };
 
-      fetchMedications();
+      fetchAndSchedule();
 
       return () => { isActive = false; };
-    }, [user?.id])
+    }, [user?.id]) 
   );
 
   const getMedsForDate = (date) => {
@@ -190,6 +234,7 @@ export const MainAppScreen = ({ navigation }) => {
           <ScrollView style={styles.scrollContent}>
             <View style={styles.invisiblePadding} />
 
+            {/* ALERTA DE STOCK BAJO */}
             {lowStock.length > 0 && (
               <View style={styles.alertBox}>
                 <Text style={[styles.alertTitle, accessibilitySettings.largeFont && { fontSize: 16 }]}>
@@ -203,6 +248,7 @@ export const MainAppScreen = ({ navigation }) => {
               </View>
             )}
 
+            {/* SECCIÓN CALENDARIO */}
             <View style={styles.section}>
               <ScreenTitle accessibilitySettings={accessibilitySettings}>
                 Calendario Health Reminder
@@ -222,6 +268,7 @@ export const MainAppScreen = ({ navigation }) => {
               </View>
             </View>
 
+            {/* SECCIÓN LISTA DE HOY */}
             <View style={styles.section}>
               <View style={styles.todayHeader}>
                 <Text style={styles.todayBullet}>●</Text>
@@ -237,7 +284,7 @@ export const MainAppScreen = ({ navigation }) => {
               <View style={styles.medicationList}>
                 {getMedsForDate(selectedDate).map((med) => (
                   <View key={med.id} style={styles.medicationDetailCard}>
-                    <Text style={[styles.medicationName, { marginBottom: 5, color: getMedicationColor(med.nombre) }]}>
+                    <Text style={[styles.medicationName, { marginBottom: 5, color: getMedicationColor ? getMedicationColor(med.nombre) : '#2C3E50' }]}>
                       {med.nombre}
                     </Text>
                     
@@ -249,7 +296,6 @@ export const MainAppScreen = ({ navigation }) => {
                       Duración: {med.duracion || 'No especificada'}
                     </Text>
 
-                    {/* MUESTRA TODOS LOS HORARIOS MANUALES O CALCULADOS DE LA API */}
                     {med.horarios && med.horarios.length > 0 && (
                       <Text style={[styles.medicationTime, { marginBottom: 3 }]}>
                         Horarios: {med.horarios.map(hora => {
@@ -277,6 +323,21 @@ export const MainAppScreen = ({ navigation }) => {
                   </View>
                 )}
               </View>
+            </View>
+
+            {/* BOTÓN DE EMERGENCIA PARA LIMPIAR (SOLO DESARROLLO) */}
+            <View style={{ padding: 20, alignItems: 'center' }}>
+                <TouchableOpacity 
+                    onPress={handleEmergencyCleanup}
+                    style={{ backgroundColor: '#ff4444', padding: 15, borderRadius: 10 }}
+                >
+                    <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                        ⚠️ BOTÓN DE PÁNICO: BORRAR ALARMAS
+                    </Text>
+                </TouchableOpacity>
+                <Text style={{ marginTop: 5, color: '#999', fontSize: 10, textAlign: 'center' }}>
+                    Úsalo si las notificaciones se volvieron locas. Luego reinicia la app.
+                </Text>
             </View>
 
             <View style={styles.extraBottomPadding} />
