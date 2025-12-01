@@ -2,7 +2,7 @@
   "expo": {
     "name": "Recordatorio-Medico",
     "slug": "Recordatorio-Medico",
-    "version": "1.0.0",
+    "version": "2.7.26",
     "orientation": "portrait",
     "icon": "./assets/heartbeat2.png",
     "userInterfaceStyle": "light",
@@ -17,13 +17,19 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#7D7ADD"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "Health.Reminder"
     },
     "web": {
       "favicon": "./assets/heartbeat2.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8bc307b8-2db5-471e-b90b-fce986caa60f"
+      }
     }
   }
 }
