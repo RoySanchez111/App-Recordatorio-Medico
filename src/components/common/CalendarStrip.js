@@ -1,21 +1,19 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { ScrollView, Pressable, Text, View } from 'react-native';
 import { formatDate, getFiveDayWindow } from '../../utils/dateUtils';
 import { styles } from '../../styles/styles';
+import { PrescriptionsContext } from '../../contexts/AppContext';
+
+// 1. DEFINICIÓN DE LA FUNCIÓN chunkArray (Faltaba esto)
+const chunkArray = (array, size) => {
+  const chunked_arr = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunked_arr.push(array.slice(i, i + size));
+  }
+  return chunked_arr;
+};
 
 const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-
-const getMedColorStyle = (nombre) => {
-  if (!nombre) return { color: '#007AFF' }; // Color por defecto azul
-  const n = nombre.toLowerCase();
-  if (n.includes('paracetamol')) return { color: '#FF6B6B' }; // Rojo
-  if (n.includes('ibuprofeno')) return { color: '#4ECDC4' }; // Verde azulado
-  if (n.includes('naproxeno')) return { color: '#FFD166' }; // Amarillo
-  if (n.includes('tempra')) return { color: '#118AB2' }; // Azul oscuro
-  if (n.includes('amoxicilina')) return { color: '#06D6A0' }; // Verde
-  if (n.includes('omeprazol')) return { color: '#7209B7' }; // Morado
-  return { color: '#007AFF' }; // Color por defecto azul
-};
 
 export const CalendarStrip = ({ 
   currentDate, 
@@ -24,7 +22,8 @@ export const CalendarStrip = ({
   medications, 
   accessibilitySettings 
 }) => {
-  // Función CORREGIDA para filtrar medicamentos por fecha
+  const { getMedicationColor } = useContext(PrescriptionsContext);
+
   const getMedsForDate = (date) => {
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0);
@@ -57,6 +56,9 @@ export const CalendarStrip = ({
           const hasMeds = medsThatDay.length > 0;
           const isToday = formatDate(dateObj) === formatDate(new Date());
 
+          // Dividimos los medicamentos en grupos de 3
+          const medChunks = chunkArray(medsThatDay, 3);
+
           return (
             <Pressable
               key={formatDate(dateObj)}
@@ -84,21 +86,30 @@ export const CalendarStrip = ({
               </Text>
 
               {hasMeds && (
-                <View style={styles.calendarDotRow}>
-                  {medsThatDay.slice(0, 3).map((med, index) => (
-                    <Text
-                      key={med.id}
-                      style={[
-                        styles.calendarDot,
-                        getMedColorStyle(med.nombre)
-                      ]}
-                    >
-                      ●
-                    </Text>
+                // 2. CONTENEDOR VERTICAL
+                <View style={{ flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
+                  {/* 3. Renderizamos cada FILA de 3 bolitas */}
+                  {medChunks.map((chunk, rowIndex) => (
+                    <View key={rowIndex} style={styles.calendarDotRow}>
+                      {chunk.map((med, index) => {
+                        const medName = med.nombre_medicamento || med.nombre || med.medicationName;
+                        // Key única para evitar warnings
+                        const uniqueKey = med.id || `row-${rowIndex}-${index}`;
+                        
+                        return (
+                          <Text
+                            key={uniqueKey}
+                            style={[
+                              styles.calendarDot,
+                              { color: getMedicationColor(medName) } 
+                            ]}
+                          >
+                            ●
+                          </Text>
+                        );
+                      })}
+                    </View>
                   ))}
-                  {medsThatDay.length > 3 && (
-                    <Text style={styles.moreDots}>+{medsThatDay.length - 3}</Text>
-                  )}
                 </View>
               )}
             </Pressable>

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Recordatorio-Medico",
+    "name": "Health.Reminder",
     "slug": "Recordatorio-Medico",
     "version": "2.7.26",
     "orientation": "portrait",
@@ -10,14 +10,14 @@
     "splash": {
       "image": "./assets/heartbeat2.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#7D7ADD"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#7D7ADD"
       },
       "edgeToEdgeEnabled": true,
